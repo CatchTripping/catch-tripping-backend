@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+# Ignore config.yml
+config.yml
+
+#Ignore wallet
+/Wallet_bonhyukouk

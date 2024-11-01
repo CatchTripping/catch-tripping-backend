@@ -41,6 +41,16 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3")
 	testImplementation("org.springframework.security:spring-security-test")
+	runtimeOnly("com.oracle.database.jdbc:ojdbc11")
+
+
+	// https://mvnrepository.com/artifact/com.oracle.database.security/oraclepki
+	implementation("com.oracle.database.security:oraclepki:23.5.0.24.07")
+	// https://mvnrepository.com/artifact/com.oracle.database.security/osdt_core
+	implementation("com.oracle.database.security:osdt_core:21.15.0.0")
+	// https://mvnrepository.com/artifact/com.oracle.database.security/osdt_cert
+	implementation("com.oracle.database.security:osdt_cert:21.15.0.0")
+
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
