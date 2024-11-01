@@ -4,9 +4,9 @@ spring:
       - classpath:config.yml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url:
-    username: ${oracle.username}
-    password: ${oracle.password}
+    url: jdbc:mysql://70.12.107.109:33061/catch_tripping?serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${mysql.username}
+    password: ${mysql.password}
   ai:
     openai:
       api-key: ${openai.api-key}
