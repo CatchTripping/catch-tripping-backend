@@ -46,12 +46,10 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/com.oracle.database.security/oraclepki
 	implementation("com.oracle.database.security:oraclepki:23.5.0.24.07")
-// https://mvnrepository.com/artifact/com.oracle.database.security/osdt_core
+	// https://mvnrepository.com/artifact/com.oracle.database.security/osdt_core
 	implementation("com.oracle.database.security:osdt_core:21.15.0.0")
 	// https://mvnrepository.com/artifact/com.oracle.database.security/osdt_cert
 	implementation("com.oracle.database.security:osdt_cert:21.15.0.0")
-
-
 
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

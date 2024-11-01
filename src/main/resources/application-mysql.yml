@@ -1,0 +1,15 @@
+spring:
+  config:
+    import:
+      - classpath:config.yml
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url:
+    username: ${oracle.username}
+    password: ${oracle.password}
+  ai:
+    openai:
+      api-key: ${openai.api-key}
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
