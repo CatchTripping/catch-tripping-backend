@@ -4,7 +4,7 @@ spring:
       - classpath:config.yml
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@bonhyukouk_high?TNS_ADMIN=C:\\Users\\SSAFY\\Downloads\\Wallet_bonhyukouk
+    url: jdbc:oracle:thin:@bonhyukouk_high?TNS_ADMIN=./Wallet_bonhyukouk
     username: ${oracle.username}
     password: ${oracle.password}
   ai:

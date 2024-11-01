@@ -39,3 +39,6 @@ out/
 
 # Ignore config.yml
 config.yml
+
+#Ignore wallet
+/Wallet_bonhyukouk
