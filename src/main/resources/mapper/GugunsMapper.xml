@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bho.catchtrippingbackend.guguns.model.dao.GugunsDao">
+    <select id="listGuguns" resultType="com.bho.catchtrippingbackend.guguns.model.GugunsDto">
+        SELECT no, sido_code AS sidoCode, gugun_code AS gugunCode, gugun_name AS gugunName
+        FROM guguns
+        <where>
+            <if test="sidoCode != null and sidoCode != ''">
+                sido_code = #{sidoCode}
+            </if>
+        </where>
+        ORDER BY gugun_code
+    </select>
+</mapper>

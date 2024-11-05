@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: catch-tripping-backend
+  profiles:
+    active: oracle
+
+server:
+  port: 8080
