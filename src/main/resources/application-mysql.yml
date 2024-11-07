@@ -4,7 +4,7 @@ spring:
       - classpath:config.yml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://70.12.107.109:33061/catch_tripping?serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/ssafy_trip_batch?serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${mysql.username}
     password: ${mysql.password}
   ai:
