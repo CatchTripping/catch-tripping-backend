@@ -188,10 +188,4 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <!-- 지역 코드와 시군구 코드로 조회 -->
-    <select id="findByAreaCodeAndSigunguCode" resultType="com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents">
-        SELECT * FROM area_based_contents
-        WHERE areacode = #{areaCode} AND sigungucode = #{sigunguCode}
-    </select>
-
 </mapper>
