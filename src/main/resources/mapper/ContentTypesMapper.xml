@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bho.catchtrippingbackend.attractions.dao.ContentTypesDao">
+
+    <!-- Primary Key로 조회 -->
+    <select id="findByContentTypeId" parameterType="int" resultType="com.bho.catchtrippingbackend.attractions.dto.ContentTypes">
+        SELECT * FROM content_types WHERE content_type_id = #{contentTypeId}
+    </select>
+
+    <!-- 모든 콘텐츠 유형 조회 -->
+    <select id="findAll" resultType="com.bho.catchtrippingbackend.attractions.dto.ContentTypes">
+        SELECT * FROM content_types
+    </select>
+
+    <!-- 특정 콘텐츠 유형 이름으로 조회 (정확히 일치하는 경우) -->
+    <select id="findByContentTypeName" parameterType="string" resultType="com.bho.catchtrippingbackend.attractions.dto.ContentTypes">
+        SELECT * FROM content_types WHERE content_type_name = #{contentTypeName}
+    </select>
+
+    <!-- 특정 이름을 포함하는 콘텐츠 유형 조회 (부분 일치 검색) -->
+    <select id="findByContentTypeNameContaining" parameterType="string" resultType="com.bho.catchtrippingbackend.attractions.dto.ContentTypes">
+        SELECT * FROM content_types WHERE content_type_name LIKE CONCAT('%', #{partialName}, '%')
+    </select>
+
+</mapper>

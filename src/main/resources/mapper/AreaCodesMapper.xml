@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bho.catchtrippingbackend.attractions.dao.AreaCodesDao">
+
+    <!-- Primary Key로 조회 -->
+    <select id="findByAreaCode" parameterType="int" resultType="com.bho.catchtrippingbackend.attractions.dto.AreaCodes">
+        SELECT * FROM area_codes WHERE area_code = #{areaCode}
+    </select>
+
+    <!-- 모든 지역 코드 조회 -->
+    <select id="findAll" resultType="com.bho.catchtrippingbackend.attractions.dto.AreaCodes">
+        SELECT * FROM area_codes
+    </select>
+
+    <!-- 특정 지역 이름으로 조회 (정확히 일치하는 경우) -->
+    <select id="findByAreaName" parameterType="string" resultType="com.bho.catchtrippingbackend.attractions.dto.AreaCodes">
+        SELECT * FROM area_codes WHERE area_name = #{areaName}
+    </select>
+
+    <!-- 특정 이름을 포함하는 지역 코드 조회 (부분 일치 검색) -->
+    <select id="findByAreaNameContaining" parameterType="string" resultType="com.bho.catchtrippingbackend.attractions.dto.AreaCodes">
+        SELECT * FROM area_codes WHERE area_name LIKE CONCAT('%', #{partialName}, '%')
+    </select>
+
+</mapper>
