@@ -5,23 +5,29 @@
 
 <mapper namespace="com.bho.catchtrippingbackend.attractions.dao.CategoryCodesDao">
 
+    <!-- CategoryCodes resultMap 정의 -->
+    <resultMap id="CategoryCodesMap" type="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes">
+        <id property="categoryCode" column="category_code"/>
+        <result property="categoryName" column="category_name"/>
+    </resultMap>
+
     <!-- Primary Key로 조회 -->
-    <select id="findByCategoryCode" parameterType="string" resultType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes">
+    <select id="findByCategoryCode" parameterType="string" resultMap="CategoryCodesMap">
         SELECT * FROM category_codes WHERE category_code = #{categoryCode}
     </select>
 
     <!-- 모든 카테고리 코드 조회 -->
-    <select id="findAll" resultType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes">
+    <select id="findAll" resultMap="CategoryCodesMap">
         SELECT * FROM category_codes
     </select>
 
     <!-- 특정 카테고리 이름으로 조회 (정확히 일치하는 경우) -->
-    <select id="findByCategoryName" parameterType="string" resultType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes">
+    <select id="findByCategoryName" parameterType="string" resultMap="CategoryCodesMap">
         SELECT * FROM category_codes WHERE category_name = #{categoryName}
     </select>
 
     <!-- 특정 이름을 포함하는 카테고리 코드 조회 (부분 일치 검색) -->
-    <select id="findByCategoryNameContaining" parameterType="string" resultType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes">
+    <select id="findByCategoryNameContaining" parameterType="string" resultMap="CategoryCodesMap">
         SELECT * FROM category_codes WHERE category_name LIKE CONCAT('%', #{partialName}, '%')
     </select>
 

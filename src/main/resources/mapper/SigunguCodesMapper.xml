@@ -5,29 +5,36 @@
 
 <mapper namespace="com.bho.catchtrippingbackend.attractions.dao.SigunguCodesDao">
 
+    <!-- SigunguCodes resultMap 정의 -->
+    <resultMap id="SigunguCodesMap" type="com.bho.catchtrippingbackend.attractions.dto.SigunguCodes">
+        <id property="areaCode" column="area_code"/>
+        <id property="sigunguCode" column="sigungu_code"/>
+        <result property="sigunguName" column="sigungu_name"/>
+    </resultMap>
+
     <!-- Primary Key (areaCode와 sigunguCode)로 조회 -->
-    <select id="findByAreaCodeAndSigunguCode" resultType="com.bho.catchtrippingbackend.attractions.dto.SigunguCodes">
+    <select id="findByAreaCodeAndSigunguCode" resultMap="SigunguCodesMap">
         SELECT * FROM sigungu_codes
         WHERE area_code = #{areaCode} AND sigungu_code = #{sigunguCode}
     </select>
 
     <!-- 특정 지역 코드로 시군구 조회 -->
-    <select id="findByAreaCode" parameterType="int" resultType="com.bho.catchtrippingbackend.attractions.dto.SigunguCodes">
+    <select id="findByAreaCode" parameterType="int" resultMap="SigunguCodesMap">
         SELECT * FROM sigungu_codes WHERE area_code = #{areaCode}
     </select>
 
     <!-- 모든 시군구 코드 조회 -->
-    <select id="findAll" resultType="com.bho.catchtrippingbackend.attractions.dto.SigunguCodes">
+    <select id="findAll" resultMap="SigunguCodesMap">
         SELECT * FROM sigungu_codes
     </select>
 
     <!-- 특정 시군구 이름으로 조회 (정확히 일치하는 경우) -->
-    <select id="findBySigunguName" parameterType="string" resultType="com.bho.catchtrippingbackend.attractions.dto.SigunguCodes">
+    <select id="findBySigunguName" parameterType="string" resultMap="SigunguCodesMap">
         SELECT * FROM sigungu_codes WHERE sigungu_name = #{sigunguName}
     </select>
 
     <!-- 특정 이름을 포함하는 시군구 조회 (부분 일치 검색) -->
-    <select id="findBySigunguNameContaining" parameterType="string" resultType="com.bho.catchtrippingbackend.attractions.dto.SigunguCodes">
+    <select id="findBySigunguNameContaining" parameterType="string" resultMap="SigunguCodesMap">
         SELECT * FROM sigungu_codes WHERE sigungu_name LIKE CONCAT('%', #{partialName}, '%')
     </select>
 

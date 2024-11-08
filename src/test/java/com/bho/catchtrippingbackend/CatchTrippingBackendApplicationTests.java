@@ -283,7 +283,7 @@ class CatchTrippingBackendApplicationTests {
         System.out.println(categoryCodes);
     }
 
-    // ContentTypes 관련 테스트 메서드
+     //ContentTypes 관련 테스트 메서드
 
     @Test
     void testGetContentType() {
