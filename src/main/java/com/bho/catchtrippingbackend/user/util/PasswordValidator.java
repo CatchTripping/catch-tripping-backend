@@ -1,4 +1,4 @@
-package com.bho.catchtrippingbackend.users.util;
+package com.bho.catchtrippingbackend.user.util;
 
 public class PasswordValidator {
 

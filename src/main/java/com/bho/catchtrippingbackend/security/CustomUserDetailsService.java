@@ -1,9 +1,8 @@
 package com.bho.catchtrippingbackend.security;
 
-import com.bho.catchtrippingbackend.users.model.UsersDto;
-import com.bho.catchtrippingbackend.users.model.dao.UsersDao;
+import com.bho.catchtrippingbackend.user.entity.User;
+import com.bho.catchtrippingbackend.user.dao.UserDao;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,16 +12,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UsersDao usersDao;
+    private final UserDao userDao;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UsersDto user = usersDao.findUserByUsername(username);
+        User user = userDao.findUserByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("Invalid credential");
         }
 
-        return User.builder()
+        return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUserName())
                 .password(user.getUserPassword())
                 .roles("USER")
