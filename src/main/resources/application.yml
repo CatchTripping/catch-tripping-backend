@@ -6,3 +6,15 @@ spring:
 
 server:
   port: 8080
+  servlet:
+    session:
+      cookie:
+        secure: false
+        http-only: true
+        same-site: lax
+      timeout: 1800 # 30분
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.bho.catchtrippingbackend: DEBUG
