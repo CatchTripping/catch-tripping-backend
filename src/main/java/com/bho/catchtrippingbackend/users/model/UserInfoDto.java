@@ -11,5 +11,6 @@ import java.util.Collection;
 @AllArgsConstructor
 public class UserInfoDto {
     private String userName;
+    private String userEmail;
     private Collection<?> authorities;
 }

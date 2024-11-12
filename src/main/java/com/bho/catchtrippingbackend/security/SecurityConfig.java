@@ -41,8 +41,8 @@ public class SecurityConfig {
                 .cors((cors) -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/register", "/users/register", "/login", "/authenticate").anonymous()
-                        .requestMatchers("/error", "/").permitAll()
+                        .requestMatchers("/register", "/users/register", "/users/check-email", "/users/check-username", "/login", "/authenticate").anonymous()
+                        .requestMatchers("/error", "/", "/users/check").permitAll()
                         .requestMatchers("/users/userinfo").authenticated()
                         .anyRequest().authenticated()
                 )
@@ -67,12 +67,17 @@ public class SecurityConfig {
                 )
                 .logout((logout) -> logout
                         .logoutUrl("/logout")
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "remember-me")
                         .invalidateHttpSession(true) // 세션 만료화
                         .logoutSuccessHandler((request, response, authentication) -> {
                             response.setContentType("application/json");
                             response.getWriter().write("{\"status\":\"success\", \"message\":\"Logout successful\"}");
                         })
+                )
+                .rememberMe(rememberMe -> rememberMe
+                        .key("uniqueAndSecret")
+                        .tokenValiditySeconds(604800) // 1주
+                        .userDetailsService(customUserDetailsService)
                 )
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -99,12 +104,12 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    @Bean
-    public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.authenticationProvider(authenticationProvider());
-        return authenticationManagerBuilder.build();
-    }
+//    @Bean
+//    public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
+//        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+//        authenticationManagerBuilder.authenticationProvider(authenticationProvider());
+//        return authenticationManagerBuilder.build();
+//    }
 
     // configure 메서드로 CustomUserDetailsService 설정
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
