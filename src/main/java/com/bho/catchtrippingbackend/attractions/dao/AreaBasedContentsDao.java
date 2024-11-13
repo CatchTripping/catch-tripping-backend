@@ -2,6 +2,7 @@ package com.bho.catchtrippingbackend.attractions.dao;
 
 import com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents;
 import com.bho.catchtrippingbackend.attractions.dto.AttractionSearchCriteria;
+import com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -67,6 +68,14 @@ public interface AreaBasedContentsDao {
             @Param("offset") int offset);
 
     // **추가된 메서드: 지역 코드와 시군구 코드로 조회**
-    List<AreaBasedContents> findByAreaCodeAndSigunguCode(@Param("areaCode") int areaCode,
-                                                         @Param("sigunguCode") int sigunguCode);
+    List<AreaBasedContents> findByAreaCodeAndSigunguCode(@Param("areaCode") int areaCode, @Param("sigunguCode") int sigunguCode);
+
+    // HotPlace 조회 메서드 추가
+    List<HotPlaceResponse> findHotPlaces(
+            @Param("hotPlaceType") String hotPlaceType,
+            @Param("regionCode") int regionCode,
+            @Param("sigunguCodes") List<Integer> sigunguCodes,
+            @Param("limit") int limit,
+            @Param("offset") int offset
+    );
 }

@@ -213,4 +213,33 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
+    <!-- HotPlace 조회 메서드 -->
+    <select id="findHotPlaces" resultType="com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse">
+        SELECT title, firstimage AS firstImage, contentid AS contentId
+        FROM area_based_contents
+        WHERE
+        <choose>
+            <when test="hotPlaceType == 'Restaurant'">
+                contenttypeid = 39
+            </when>
+            <when test="hotPlaceType == 'Place'">
+                contenttypeid IN (12, 14, 15, 25, 28, 32, 38)
+            </when>
+            <when test="hotPlaceType == 'Accommodation'">
+                contenttypeid = 32
+            </when>
+            <otherwise>
+                1 = 1 <!-- 항상 참인 조건 -->
+            </otherwise>
+        </choose>
+        AND areacode = #{regionCode}
+        <if test="sigunguCodes != null and sigunguCodes.size() > 0">
+            AND sigungucode IN
+            <foreach item="code" collection="sigunguCodes" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+        </if>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
 </mapper>

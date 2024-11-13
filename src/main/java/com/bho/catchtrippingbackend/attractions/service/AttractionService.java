@@ -1,6 +1,8 @@
 package com.bho.catchtrippingbackend.attractions.service;
 
 import com.bho.catchtrippingbackend.attractions.dto.*;
+import com.bho.catchtrippingbackend.attractions.dto.request.HotPlaceRequest;
+import com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -78,4 +80,6 @@ public interface AttractionService {
     List<ContentTypes> getContentTypesByName(String contentTypeName); // 콘텐츠 타입 이름으로 조회
 
     List<ContentTypes> searchContentTypesByName(String partialName); // 부분 일치하는 콘텐츠 타입 이름으로 검색
+
+    List<HotPlaceResponse> getHotPlaces(HotPlaceRequest request);
 }

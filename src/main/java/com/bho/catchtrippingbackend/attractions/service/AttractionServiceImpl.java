@@ -2,6 +2,8 @@ package com.bho.catchtrippingbackend.attractions.service;
 
 import com.bho.catchtrippingbackend.attractions.dao.*;
 import com.bho.catchtrippingbackend.attractions.dto.*;
+import com.bho.catchtrippingbackend.attractions.dto.request.HotPlaceRequest;
+import com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse;
 import com.bho.catchtrippingbackend.attractions.service.AttractionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -201,5 +203,18 @@ public class AttractionServiceImpl implements AttractionService {
     @Override
     public List<ContentTypes> searchContentTypesByName(String partialName) {
         return contentTypesDao.findByContentTypeNameContaining(partialName);
+    }
+
+    @Override
+    public List<HotPlaceResponse> getHotPlaces(HotPlaceRequest request) {
+        int limit = request.getOffset();
+        int offset = (request.getPage() - 1) * limit;
+        return areaBasedContentsDao.findHotPlaces(
+                request.getHotPlaceType(),
+                request.getRegionCode(),
+                request.getSigunguCodes(),
+                limit,
+                offset
+        );
     }
 }
