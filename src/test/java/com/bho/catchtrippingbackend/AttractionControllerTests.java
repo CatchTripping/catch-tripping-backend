@@ -31,7 +31,6 @@ class AttractionControllerTests {
         List<Integer> sigunguCodes = List.of(4, 5);
         List<HotPlaceResponse> hotPlaces = areaBasedContentsDao.findHotPlaces(
                 "Restaurant", 1, sigunguCodes, 8, 0);
-
         assertNotNull(hotPlaces);
         assertEquals(8, hotPlaces.size());
     }

@@ -30,6 +30,20 @@
         <result property="zipcode" column="zipcode"/>
     </resultMap>
 
+    <!-- ResultMap for CategoryCodes -->
+    <resultMap id="CategoryCodesMap" type="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes">
+        <id property="categoryCode" column="category_code"/>
+        <result property="categoryName" column="category_name"/>
+    </resultMap>
+
+    <!-- ResultMap for HotPlaceResponse -->
+    <resultMap id="HotPlaceResponseMap" type="com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse">
+        <id property="contentId" column="contentid"/>
+        <result property="title" column="title"/>
+        <result property="firstImage" column="firstimage"/>
+        <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes" select="getCategoriesByContentId" column="contentid"/>
+    </resultMap>
+
     <!-- ID로 데이터 조회 -->
     <select id="findById" parameterType="int" resultMap="AreaBasedContentsMap">
         SELECT * FROM area_based_contents WHERE contentid = #{contentId}
@@ -214,32 +228,48 @@
     </select>
 
     <!-- HotPlace 조회 메서드 -->
-    <select id="findHotPlaces" resultType="com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse">
-        SELECT title, firstimage AS firstImage, contentid AS contentId
-        FROM area_based_contents
+    <select id="findHotPlaces" resultMap="HotPlaceResponseMap">
+        SELECT
+        abc.title,
+        abc.firstimage,
+        abc.contentid
+        FROM area_based_contents abc
         WHERE
         <choose>
             <when test="hotPlaceType == 'Restaurant'">
-                contenttypeid = 39
+                abc.contenttypeid = 39
             </when>
             <when test="hotPlaceType == 'Place'">
-                contenttypeid IN (12, 14, 15, 25, 28, 32, 38)
+                abc.contenttypeid IN (12, 14, 15, 25, 28, 32, 38)
             </when>
             <when test="hotPlaceType == 'Accommodation'">
-                contenttypeid = 32
+                abc.contenttypeid = 32
             </when>
             <otherwise>
-                1 = 1 <!-- 항상 참인 조건 -->
+                1 = 1
             </otherwise>
         </choose>
-        AND areacode = #{regionCode}
+        AND abc.areacode = #{regionCode}
         <if test="sigunguCodes != null and sigunguCodes.size() > 0">
-            AND sigungucode IN
+            AND abc.sigungucode IN
             <foreach item="code" collection="sigunguCodes" open="(" separator="," close=")">
                 #{code}
             </foreach>
         </if>
         LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- Nested select to get categories by content ID -->
+    <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">
+        SELECT cc.category_code, cc.category_name
+        FROM category_codes cc
+        WHERE cc.category_code IN (
+            SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}
+            UNION
+            SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}
+            UNION
+            SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}
+        )
     </select>
 
 </mapper>
