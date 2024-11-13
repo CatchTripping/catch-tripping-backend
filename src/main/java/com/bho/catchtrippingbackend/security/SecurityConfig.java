@@ -29,6 +29,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     private final CustomUserDetailsService customUserDetailsService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher() {
@@ -74,6 +76,10 @@ public class SecurityConfig {
                             response.getWriter().write("{\"status\":\"success\", \"message\":\"Logout successful\"}");
                         })
                 )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
                 .rememberMe(rememberMe -> rememberMe
                         .key("uniqueAndSecret")
                         .tokenValiditySeconds(604800) // 1주
@@ -111,8 +117,8 @@ public class SecurityConfig {
 //        return authenticationManagerBuilder.build();
 //    }
 
-    // configure 메서드로 CustomUserDetailsService 설정
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider());
-    }
+//    // configure 메서드로 CustomUserDetailsService 설정
+//    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+//        auth.authenticationProvider(authenticationProvider());
+//    }
 }

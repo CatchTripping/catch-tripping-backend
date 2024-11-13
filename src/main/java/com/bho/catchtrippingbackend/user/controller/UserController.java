@@ -1,5 +1,6 @@
 package com.bho.catchtrippingbackend.user.controller;
 
+import com.bho.catchtrippingbackend.error.response.CustomResponse;
 import com.bho.catchtrippingbackend.user.dto.*;
 import com.bho.catchtrippingbackend.user.entity.User;
 import com.bho.catchtrippingbackend.user.service.UserService;
@@ -24,10 +25,10 @@ public class UserController {
      * @return 등록된 사용자 ID를 포함한 응답 DTO
      */
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterResponseDto> registerUser(@Valid @RequestBody UserRegisterRequestDto request) {
+    public ResponseEntity<CustomResponse<UserRegisterResponseDto>> registerUser(@Valid @RequestBody UserRegisterRequestDto request) {
         UserRegisterResponseDto response = userService.registerUser(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CustomResponse.success(response));
     }
 
     /**
@@ -37,11 +38,11 @@ public class UserController {
      * @return 사용 가능 여부 (true: 사용 가능, false: 중복)
      */
     @GetMapping("/check-username")
-    public ResponseEntity<CheckUsernameResponseDto> checkUsername(@RequestParam("userName") String userName) {
+    public ResponseEntity<CustomResponse<CheckUsernameResponseDto>> checkUsername(@RequestParam("userName") String userName) {
         boolean isAvailable = userService.isUsernameAvailable(userName);
         CheckUsernameResponseDto response = new CheckUsernameResponseDto(isAvailable);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CustomResponse.success(response));
     }
 
     /**
@@ -51,10 +52,10 @@ public class UserController {
      * @return 사용 가능 여부 (true: 사용 가능, false: 이미 사용 중)
      */
     @GetMapping("/check-email")
-    public ResponseEntity<CheckEmailResponseDto> checkEmailAvailability(@RequestParam("userEmail") String userEmail) {
+    public ResponseEntity<CustomResponse<CheckEmailResponseDto>> checkEmailAvailability(@RequestParam("userEmail") String userEmail) {
         boolean isAvailable = userService.isEmailAvailable(userEmail);
         CheckEmailResponseDto response = new CheckEmailResponseDto(isAvailable);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CustomResponse.success(response));
     }
 
     /**
@@ -64,11 +65,11 @@ public class UserController {
      * @return 인증 상태 (true: 인증됨, false: 인증되지 않음)
      */
     @GetMapping("/check")
-    public ResponseEntity<CheckLoginResponseDto> checkLogin(Authentication authentication) {
+    public ResponseEntity<CustomResponse<CheckLoginResponseDto>> checkLogin(Authentication authentication) {
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated();
         CheckLoginResponseDto response = new CheckLoginResponseDto(isAuthenticated);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CustomResponse.success(response));
     }
 
     /**
@@ -78,7 +79,7 @@ public class UserController {
      * @return 인증된 사용자 정보 (userName, userEmail, profileImage, 권한 목록)
      */
     @GetMapping("/userinfo")
-    public ResponseEntity<UserDto> getUserInfo(Authentication authentication) {
+    public ResponseEntity<CustomResponse<UserDto>> getUserInfo(Authentication authentication) {
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
         User userDetails = userService.findUserByUsername(user.getUsername());
 
@@ -86,6 +87,6 @@ public class UserController {
                 userDetails,
                 user.getAuthorities()
         );
-        return ResponseEntity.ok(userInfo);
+        return ResponseEntity.ok(CustomResponse.success(userInfo));
     }
 }

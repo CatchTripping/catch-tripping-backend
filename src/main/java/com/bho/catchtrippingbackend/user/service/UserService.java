@@ -1,6 +1,8 @@
 package com.bho.catchtrippingbackend.user.service;
 
 
+import com.bho.catchtrippingbackend.error.SystemException;
+import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
 import com.bho.catchtrippingbackend.user.dto.UserRegisterRequestDto;
 import com.bho.catchtrippingbackend.user.dto.UserRegisterResponseDto;
 import com.bho.catchtrippingbackend.user.entity.User;
@@ -32,12 +34,12 @@ public class UserService {
 
         // 사용자 이름 중복 체크
         if (!isUsernameAvailable(request.userName())) {
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+            throw new SystemException(ClientErrorCode.DUPLICATE_USERNAME);
         }
 
         // 사용자 이메일 중복 체크
         if (!isEmailAvailable(request.userEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new SystemException(ClientErrorCode.DUPLICATE_EMAIL);
         }
 
         // 비밀번호 암호화 후 저장
@@ -45,18 +47,17 @@ public class UserService {
 
         // 엔티티 생성
         User user = request.toEntity(encryptedPassword);
-//        User user = User.builder()
-//                .userName(request.userName())
-//                .userEmail(request.userEmail())
-//                .userPassword(encryptedPassword)
-//                .build();
-
         userDao.createUser(user);
 
         return new UserRegisterResponseDto(user.getUserId());
     }
 
     public User findUserByUsername(String userName) {
-        return userDao.findUserByUsername(userName);
+        User user = userDao.findUserByUsername(userName);
+        if (user == null) {
+            throw new SystemException(ClientErrorCode.USER_NOT_FOUND);
+        }
+
+        return user;
     }
 }
