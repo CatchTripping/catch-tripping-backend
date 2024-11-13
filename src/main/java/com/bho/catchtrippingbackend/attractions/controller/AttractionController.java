@@ -25,7 +25,7 @@ public class AttractionController {
     }
 
     // GET 요청에 대한 응답
-    @GetMapping("/list")
+    @GetMapping("/hotplace")
     public ResponseEntity<List<HotPlaceResponse>> getHotPlaces(@ModelAttribute HotPlaceRequest hotPlaceRequest) {
         List<HotPlaceResponse> hotPlaces = attractionService.getHotPlaces(hotPlaceRequest);
         return new ResponseEntity<>(hotPlaces, HttpStatus.OK);
