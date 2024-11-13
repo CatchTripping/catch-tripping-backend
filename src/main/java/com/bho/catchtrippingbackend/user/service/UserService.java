@@ -5,7 +5,6 @@ import com.bho.catchtrippingbackend.user.dto.UserRegisterRequestDto;
 import com.bho.catchtrippingbackend.user.dto.UserRegisterResponseDto;
 import com.bho.catchtrippingbackend.user.entity.User;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
-import com.bho.catchtrippingbackend.user.util.PasswordValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
