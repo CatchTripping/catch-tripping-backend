@@ -18,3 +18,7 @@ logging:
   level:
     org.springframework.security: DEBUG
     com.bho.catchtrippingbackend: DEBUG
+
+mybatis:
+  mapper-locations: mapper/*.xml
+  type-aliases-package: com.bho.catchtrippingbackend.**.entity

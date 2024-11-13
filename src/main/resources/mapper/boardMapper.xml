@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bho.catchtrippingbackend.board.dao.BoardDao">
+
+    <resultMap id="BoardResultMap" type="Board">
+        <id property="id" column="id"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+
+        <association property="user" javaType="User">
+            <id property="userId" column="user_id"/>
+            <result property="userName" column="user_name"/>
+            <result property="userEmail" column="user_email"/>
+            <result property="userPassword" column="user_password"/>
+            <result property="profileImage" column="profile_image"/>
+            <result property="createdAt" column="user_created_at"/>
+        </association>
+    </resultMap>
+
+    <insert id="saveBoard" parameterType="Board">
+        INSERT INTO board (user_id, content)
+        VALUES (#{user.userId}, #{content})
+    </insert>
+
+    <update id="updateBoard" parameterType="Board">
+        UPDATE board
+        SET content = #{content},
+        updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteBoard" parameterType="Long">
+        DELETE FROM board WHERE id = #{id}
+    </delete>
+
+
+</mapper>
