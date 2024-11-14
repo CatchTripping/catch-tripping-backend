@@ -1,5 +1,7 @@
 package com.bho.catchtrippingbackend.user.controller;
 
+import com.bho.catchtrippingbackend.error.SystemException;
+import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
 import com.bho.catchtrippingbackend.error.response.CustomResponse;
 import com.bho.catchtrippingbackend.user.dto.*;
 import com.bho.catchtrippingbackend.user.entity.User;
@@ -40,9 +42,11 @@ public class UserController {
     @GetMapping("/check-username")
     public ResponseEntity<CustomResponse<CheckUsernameResponseDto>> checkUsername(@RequestParam("userName") String userName) {
         boolean isAvailable = userService.isUsernameAvailable(userName);
+        // 상태 메시지와 데이터를 포함한 응답 반환
         CheckUsernameResponseDto response = new CheckUsernameResponseDto(isAvailable);
+        String message = isAvailable ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.";
 
-        return ResponseEntity.ok(CustomResponse.success(response));
+        return ResponseEntity.ok(CustomResponse.success(response, message));
     }
 
     /**
@@ -65,11 +69,19 @@ public class UserController {
      * @return 인증 상태 (true: 인증됨, false: 인증되지 않음)
      */
     @GetMapping("/check")
-    public ResponseEntity<CustomResponse<CheckLoginResponseDto>> checkLogin(Authentication authentication) {
+    public ResponseEntity<CheckLoginResponseDto> checkLogin(Authentication authentication) {
+//        // 인증되지 않은 사용자 처리
+//        if (authentication == null || !authentication.isAuthenticated()) {
+//            throw new SystemException(ClientErrorCode.NOT_AUTHORIZED);
+//        }
+//
+//        // 인증된 사용자: 성공 응답
+//        CheckLoginResponseDto response = new CheckLoginResponseDto(true);
+//        return ResponseEntity.ok(CustomResponse.success(response));
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated();
         CheckLoginResponseDto response = new CheckLoginResponseDto(isAuthenticated);
 
-        return ResponseEntity.ok(CustomResponse.success(response));
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -80,8 +92,14 @@ public class UserController {
      */
     @GetMapping("/userinfo")
     public ResponseEntity<CustomResponse<UserDto>> getUserInfo(Authentication authentication) {
+
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
         User userDetails = userService.findUserByUsername(user.getUsername());
+
+        if (userDetails == null) {
+            // 유효한 사용자 정보가 없다면 404
+            throw new SystemException(ClientErrorCode.USER_NOT_FOUND);
+        }
 
         UserDto userInfo = UserDto.fromEntity(
                 userDetails,

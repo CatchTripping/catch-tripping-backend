@@ -18,6 +18,7 @@ public record CustomResponse<T> (
         );
     }
 
+    // 성공 응답 (데이터와 기본 메시지 포함)
     public static <T> CustomResponse<T> success(T data) {
         return new CustomResponse<>(
                 200,
@@ -27,6 +28,17 @@ public record CustomResponse<T> (
         );
     }
 
+    // 성공 응답 (데이터와 사용자 지정 메시지 포함)
+    public static <T> CustomResponse<T> success(T data, String message) {
+        return new CustomResponse<>(
+                200,
+                "SUCCESS",
+                message,
+                data
+        );
+    }
+
+    // 성공 응답 (기본 메시지 포함, 데이터 없음)
     public static CustomResponse<Void> success() {
         return new CustomResponse<>(
                 200,

@@ -10,7 +10,8 @@ public enum ClientErrorCode implements ErrorCodeModel{
     DUPLICATE_USERNAME(400, "DUPLICATE_USERNAME", "이미 사용 중인 사용자 이름입니다."),
     DUPLICATE_EMAIL(400, "DUPLICATE_EMAIL", "이미 사용 중인 이메일입니다."),
     INVALID_PASSWORD(400, "INVALID_PASSWORD", "비밀번호는 최소 8자, 대문자, 숫자, 특수 문자를 포함해야 합니다."),
-
+    INVALID_EMAIL(400, "INVALID_EMAIL", "유효하지 않은 이메일 형식입니다."),
+    INVALID_REQUEST(400, "INVALID_REQUEST", "유효하지 않은 요청입니다."),
     // 로그인(인증) 관련 오류
     USER_NOT_FOUND(404, "USER_NOT_FOUND", "해당 사용자를 찾을 수 없습니다."),
     NOT_AUTHORIZED(401, "NOT_AUTHORIZED", "로그인이 필요합니다."),

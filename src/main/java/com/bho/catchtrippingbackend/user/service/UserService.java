@@ -29,8 +29,9 @@ public class UserService {
 
     @Transactional
     public UserRegisterResponseDto registerUser(UserRegisterRequestDto request) {
-        // 비밀번호 유효성 검사
+        // 비밀번호 이메일 형식 체크
         request.validatePassword();
+        request.validateEmail();
 
         // 사용자 이름 중복 체크
         if (!isUsernameAvailable(request.userName())) {

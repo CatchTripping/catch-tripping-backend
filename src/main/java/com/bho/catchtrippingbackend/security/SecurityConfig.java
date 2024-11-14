@@ -8,9 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -31,6 +29,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher() {
@@ -49,7 +48,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
-                                .loginPage("/login")
                                 .loginProcessingUrl("/authenticate")
                                 .usernameParameter("username")
                                 .passwordParameter("password")
@@ -60,11 +58,7 @@ public class SecurityConfig {
                                     String sessionId = request.getSession().getId();
                                     response.getWriter().write("{\"status\":\"success\", \"message\":\"Login successful\", \"sessionId\":\"" + sessionId + "\"}");
                                 })
-                                .failureHandler((HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) -> {
-                                            response.setContentType("application/json");
-                                            response.getWriter().write("{\"status\":\"failure\", \"message\":\"Login failed\"}");
-                                        }
-                                )
+                                .failureHandler(customAuthenticationFailureHandler)
                                 .permitAll()
                 )
                 .logout((logout) -> logout
@@ -76,22 +70,20 @@ public class SecurityConfig {
                             response.getWriter().write("{\"status\":\"success\", \"message\":\"Logout successful\"}");
                         })
                 )
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(customAuthenticationEntryPoint)
-                        .accessDeniedHandler(customAccessDeniedHandler)
-                )
                 .rememberMe(rememberMe -> rememberMe
                         .key("uniqueAndSecret")
-                        .tokenValiditySeconds(604800) // 1주
+                        .tokenValiditySeconds(120) // 1주
                         .userDetailsService(customUserDetailsService)
                 )
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .invalidSessionUrl("/login")
                         .sessionFixation().migrateSession()
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
-                        .expiredUrl("/login") // 세션 만료시 리다이렉트 URL
+                )
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                .accessDeniedHandler(customAccessDeniedHandler)
                 );
 
         return http.build();
@@ -109,16 +101,4 @@ public class SecurityConfig {
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-
-//    @Bean
-//    public AuthenticationManager authenticationManagerBean(HttpSecurity http) throws Exception {
-//        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-//        authenticationManagerBuilder.authenticationProvider(authenticationProvider());
-//        return authenticationManagerBuilder.build();
-//    }
-
-//    // configure 메서드로 CustomUserDetailsService 설정
-//    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.authenticationProvider(authenticationProvider());
-//    }
 }
