@@ -1,6 +1,7 @@
 package com.bho.catchtrippingbackend.board.service;
 
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
+import com.bho.catchtrippingbackend.board.dto.BoardDetailDTO;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@Transactional
 @RequiredArgsConstructor
 @Service
 public class BoardService {
@@ -20,12 +20,32 @@ public class BoardService {
     private final BoardDao boardDao;
     private final UserDao userDao;
 
+    @Transactional
     public void save(UserDetails userDetails, BoardSaveRequestDto requestDTO) {
         log.info("유저 이름 : {}", userDetails.getUsername());
         User user = getUserByName(userDetails.getUsername());
         Board board =  saveBoard(requestDTO, user);
-        log.info("Board saved successfully with id: {}", board.getId());
+        log.info("board 저장 완료 with id: {}", board.getId());
     }
+
+    @Transactional(readOnly = true)
+    public BoardDetailDTO getBoardDetailById(Long boardId) {
+        log.info("Fetching board with ID: {}", boardId);
+        Board board = getBoardById(boardId);
+
+        return BoardDetailDTO.from(board);
+    }
+
+    private Board getBoardById(Long boardId) {
+        Board board = boardDao.findBoardById(boardId);
+        if (board == null) {
+            log.error("Board not found with ID: {}", boardId);
+            throw new RuntimeException("Board not found with ID: " + boardId);
+        }
+        log.info("Board found with ID: {}", boardId);
+        return board;
+    }
+
 
     private User getUserByName(String name) {
         log.info("Fetching user with name: {}", name);
