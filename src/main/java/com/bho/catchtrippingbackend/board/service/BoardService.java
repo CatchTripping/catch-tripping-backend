@@ -25,8 +25,8 @@ public class BoardService {
     public void save(UserDetails userDetails, BoardSaveRequestDto requestDto) {
         log.info("유저 이름 : {}", userDetails.getUsername());
         User user = getUserByName(userDetails.getUsername());
-        Board board =  saveBoard(requestDto, user);
-        log.info("board 저장 완료 with id: {}", board.getId());
+
+        saveBoard(requestDto, user);
     }
 
     @Transactional(readOnly = true)
@@ -88,15 +88,13 @@ public class BoardService {
     }
 
 
-    private Board saveBoard(BoardSaveRequestDto requestDto, User user) {
+    private void saveBoard(BoardSaveRequestDto requestDto, User user) {
         log.info("Saving board with content : {} for user with ID: {}", requestDto.content(), user.getUserName());
         Board board = requestDto.from(user);
-        int result = boardDao.saveBoard(board);
+        int result = boardDao.save(board);
         log.info("board 저장 잘됐으면 1 반환 : {}", result);
         if (result != 1) {
             throw new RuntimeException("Saving board failed");
         }
-
-        return board;
     }
 }

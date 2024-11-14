@@ -22,7 +22,7 @@
     </resultMap>
 
     <!-- Save Board by ID -->
-    <insert id="saveBoard" parameterType="Board">
+    <insert id="save" parameterType="Board">
         INSERT INTO board (user_id, content)
         VALUES (#{user.userId}, #{content})
     </insert>
