@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface BoardDao {
-    int saveBoard(Board board);
+    int save(Board board);
     int update(Board board);
     int delete(Long boardId);
     Board findBoardById(@Param("boardId") Long boardId);

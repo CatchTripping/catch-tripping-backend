@@ -19,7 +19,7 @@ public class BoardController {
     private final BoardService boardService;
 
     @PostMapping
-    public ResponseEntity<String> saveBoard(
+    public ResponseEntity<String> save(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody BoardSaveRequestDto requestDTO) {
         boardService.save(userDetails, requestDTO);
