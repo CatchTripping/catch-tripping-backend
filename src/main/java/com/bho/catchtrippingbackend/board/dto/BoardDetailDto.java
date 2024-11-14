@@ -4,15 +4,15 @@ import com.bho.catchtrippingbackend.board.entity.Board;
 
 import java.time.format.DateTimeFormatter;
 
-public record BoardDetailDTO(
+public record BoardDetailDto(
         Long boardId,
         String userName,
         String content,
         String createdDate,
         String createdAt
 ) {
-    public static BoardDetailDTO from(Board board) {
-        return new BoardDetailDTO(
+    public static BoardDetailDto from(Board board) {
+        return new BoardDetailDto(
                 board.getId(),
                 board.getUser().getUserName(),
                 board.getContent(),

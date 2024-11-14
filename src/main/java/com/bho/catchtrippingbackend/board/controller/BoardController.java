@@ -1,6 +1,6 @@
 package com.bho.catchtrippingbackend.board.controller;
 
-import com.bho.catchtrippingbackend.board.dto.BoardDetailDTO;
+import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +27,11 @@ public class BoardController {
     }
 
     @GetMapping("/{boardId}")
-    public ResponseEntity<BoardDetailDTO> getBoardById(
+    public ResponseEntity<BoardDetailDto> findBoardById(
             @PathVariable Long boardId) {
-        BoardDetailDTO boardDetailDTO = boardService.getBoardDetailById(boardId);
+        BoardDetailDto boardDetailDto = boardService.findBoardDetailById(boardId);
 
-        return ResponseEntity.ok(boardDetailDTO);
+        return ResponseEntity.ok(boardDetailDto);
     }
 
 //    @PutMapping("/{boardId}")

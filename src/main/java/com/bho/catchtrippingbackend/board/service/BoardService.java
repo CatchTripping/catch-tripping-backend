@@ -1,7 +1,7 @@
 package com.bho.catchtrippingbackend.board.service;
 
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
-import com.bho.catchtrippingbackend.board.dto.BoardDetailDTO;
+import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
@@ -29,11 +29,11 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public BoardDetailDTO getBoardDetailById(Long boardId) {
+    public BoardDetailDto findBoardDetailById(Long boardId) {
         log.info("Fetching board with ID: {}", boardId);
         Board board = getBoardById(boardId);
 
-        return BoardDetailDTO.from(board);
+        return BoardDetailDto.from(board);
     }
 
     private Board getBoardById(Long boardId) {
