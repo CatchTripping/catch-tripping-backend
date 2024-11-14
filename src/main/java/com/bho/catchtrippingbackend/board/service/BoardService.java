@@ -49,11 +49,18 @@ public class BoardService {
         return BoardDetailDto.from(board);
     }
 
+    @Transactional
+    public void delete(UserDetails userDetails, Long boardId) {
+        Board board = getBoardById(boardId);
+        validateBoardAuthor(userDetails, board);
+        boardDao.delete(boardId);
+    }
+
     private void validateBoardAuthor(UserDetails userDetails, Board board) {
         boolean isAuthorized = userDetails.getUsername().equals(board.getUser().getUserName());
 
         if (!isAuthorized) {
-            throw new RuntimeException("글 수정 권한 없음");
+            throw new RuntimeException("권한 없음");
         }
     }
 

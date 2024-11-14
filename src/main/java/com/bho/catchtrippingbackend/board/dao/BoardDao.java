@@ -8,6 +8,6 @@ import org.apache.ibatis.annotations.Param;
 public interface BoardDao {
     int saveBoard(Board board);
     int update(Board board);
-    int deleteBoard(Long boardId);
+    int delete(Long boardId);
     Board findBoardById(@Param("boardId") Long boardId);
 }

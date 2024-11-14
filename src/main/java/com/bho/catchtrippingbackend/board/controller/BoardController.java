@@ -19,12 +19,12 @@ public class BoardController {
     private final BoardService boardService;
 
     @PostMapping
-    public ResponseEntity<Void> saveBoard(
+    public ResponseEntity<String> saveBoard(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody BoardSaveRequestDto requestDTO) {
         boardService.save(userDetails, requestDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.ok("저장 완료");
     }
 
     @GetMapping("/{boardId}")
@@ -42,5 +42,14 @@ public class BoardController {
             @RequestBody BoardUpdateRequestDto requestDTO) {
         BoardDetailDto boardDetailDto = boardService.update(userDetails, boardId, requestDTO);
         return ResponseEntity.ok(boardDetailDto);
+    }
+
+    @DeleteMapping("/{boardId}")
+    public ResponseEntity<String> deleteBoard(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long boardId) {
+        boardService.delete(userDetails, boardId);
+        // return status 수정
+        return ResponseEntity.ok("삭제 완료");
     }
 }
