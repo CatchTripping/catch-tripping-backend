@@ -37,7 +37,7 @@
         WHERE b.id = #{boardId}
     </select>
 
-    <update id="updateBoard" parameterType="Board">
+    <update id="update" parameterType="Board">
         UPDATE board
         SET content = #{content},
         updated_at = #{updatedAt}

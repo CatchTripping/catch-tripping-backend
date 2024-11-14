@@ -2,6 +2,7 @@ package com.bho.catchtrippingbackend.board.controller;
 
 import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
+import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
 import com.bho.catchtrippingbackend.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,12 +35,12 @@ public class BoardController {
         return ResponseEntity.ok(boardDetailDto);
     }
 
-//    @PutMapping("/{boardId}")
-//    public ResponseEntity<Void> updateBoard(
-//            @AuthenticationPrincipal UserDetails userDetails,
-//            @PathVariable Long boardId,
-//            @RequestBody BoardSaveRequestDto requestDTO) {
-//        boardService.update(userDetails, boardId, requestDTO);
-//        return ResponseEntity.status(HttpStatus.OK).build();
-//    }
+    @PatchMapping("/{boardId}")
+    public ResponseEntity<BoardDetailDto> updateBoard(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long boardId,
+            @RequestBody BoardUpdateRequestDto requestDTO) {
+        BoardDetailDto boardDetailDto = boardService.update(userDetails, boardId, requestDTO);
+        return ResponseEntity.ok(boardDetailDto);
+    }
 }

@@ -3,6 +3,7 @@ package com.bho.catchtrippingbackend.board.service;
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
 import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
+import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
 import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
@@ -21,10 +22,10 @@ public class BoardService {
     private final UserDao userDao;
 
     @Transactional
-    public void save(UserDetails userDetails, BoardSaveRequestDto requestDTO) {
+    public void save(UserDetails userDetails, BoardSaveRequestDto requestDto) {
         log.info("유저 이름 : {}", userDetails.getUsername());
         User user = getUserByName(userDetails.getUsername());
-        Board board =  saveBoard(requestDTO, user);
+        Board board =  saveBoard(requestDto, user);
         log.info("board 저장 완료 with id: {}", board.getId());
     }
 
@@ -34,6 +35,26 @@ public class BoardService {
         Board board = getBoardById(boardId);
 
         return BoardDetailDto.from(board);
+    }
+
+    @Transactional
+    public BoardDetailDto update(UserDetails userDetails, Long boardId, BoardUpdateRequestDto requestDto) {
+        Board board = getBoardById(boardId);
+
+        validateBoardAuthor(userDetails, board);
+
+        board.update(requestDto.content());
+        boardDao.update(board);
+
+        return BoardDetailDto.from(board);
+    }
+
+    private void validateBoardAuthor(UserDetails userDetails, Board board) {
+        boolean isAuthorized = userDetails.getUsername().equals(board.getUser().getUserName());
+
+        if (!isAuthorized) {
+            throw new RuntimeException("글 수정 권한 없음");
+        }
     }
 
     private Board getBoardById(Long boardId) {

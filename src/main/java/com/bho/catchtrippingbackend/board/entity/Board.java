@@ -25,4 +25,10 @@ public class Board {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
+
+
+    public void update(String content) {
+        this.content = content;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
