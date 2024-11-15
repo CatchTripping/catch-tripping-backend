@@ -31,4 +31,18 @@
         SELECT * FROM category_codes WHERE category_name LIKE CONCAT('%', #{partialName}, '%')
     </select>
 
+    <!-- getCategoriesByContentId 메서드 -->
+    <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">
+        SELECT cc.category_code, cc.category_name
+        FROM category_codes cc
+        WHERE cc.category_code IN (
+            SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}
+            UNION
+            SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}
+            UNION
+            SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}
+        )
+    </select>
+
+
 </mapper>

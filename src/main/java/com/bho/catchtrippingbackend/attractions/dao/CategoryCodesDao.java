@@ -2,6 +2,7 @@ package com.bho.catchtrippingbackend.attractions.dao;
 
 import com.bho.catchtrippingbackend.attractions.dto.CategoryCodes;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,4 +22,8 @@ public interface CategoryCodesDao {
 
     // 특정 이름을 포함하는 카테고리 코드 조회 (부분 일치 검색)
     List<CategoryCodes> findByCategoryNameContaining(String partialName);
+
+
+    // 콘텐츠 ID로 카테고리 코드 조회
+    List<CategoryCodes> getCategoriesByContentId(@Param("contentId") int contentId);
 }

@@ -3,6 +3,7 @@ package com.bho.catchtrippingbackend.attractions.dao;
 import com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents;
 import com.bho.catchtrippingbackend.attractions.dto.AttractionSearchCriteria;
 import com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse;
+import com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -77,5 +78,21 @@ public interface AreaBasedContentsDao {
             @Param("sigunguCodes") List<Integer> sigunguCodes,
             @Param("limit") int limit,
             @Param("offset") int offset
+    );
+
+    // 지정된 위치와 거리 내의 관광지 목록을 가져오는 메서드
+    List<NearbyAttractionsResponse.AttractionSummary> findNearbyAttractions(
+            @Param("latitude") double latitude,
+            @Param("longitude") double longitude,
+            @Param("distance") double distance,
+            @Param("limit") int limit,
+            @Param("offset") int offset
+    );
+
+    // 전체 아이템 수를 가져오는 메서드
+    int countNearbyAttractions(
+            @Param("latitude") double latitude,
+            @Param("longitude") double longitude,
+            @Param("distance") double distance
     );
 }

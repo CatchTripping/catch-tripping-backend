@@ -3,7 +3,9 @@ package com.bho.catchtrippingbackend.attractions.service;
 import com.bho.catchtrippingbackend.attractions.dao.*;
 import com.bho.catchtrippingbackend.attractions.dto.*;
 import com.bho.catchtrippingbackend.attractions.dto.request.HotPlaceRequest;
+import com.bho.catchtrippingbackend.attractions.dto.request.NearbyAttractionsRequest;
 import com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse;
+import com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse;
 import com.bho.catchtrippingbackend.attractions.service.AttractionService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -340,5 +342,35 @@ public class AttractionServiceImpl implements AttractionService {
         contentDetails.setHomepage(homepage);
 
         return contentDetails;
+    }
+
+    @Override
+    public NearbyAttractionsResponse getNearbyAttractions(NearbyAttractionsRequest request) {
+        int limit = request.getPageSize();
+        int offset = (request.getPage() - 1) * limit;
+
+        List<NearbyAttractionsResponse.AttractionSummary> attractions = areaBasedContentsDao.findNearbyAttractions(
+                request.getLatitude(),
+                request.getLongitude(),
+                request.getDistance(),
+                limit,
+                offset
+        );
+
+        int totalItems = areaBasedContentsDao.countNearbyAttractions(
+                request.getLatitude(),
+                request.getLongitude(),
+                request.getDistance()
+        );
+
+        int totalPages = (int) Math.ceil((double) totalItems / limit);
+
+        NearbyAttractionsResponse response = new NearbyAttractionsResponse();
+        response.setAttractions(attractions);
+        response.setTotalItems(totalItems);
+        response.setTotalPages(totalPages);
+        response.setCurrentPage(request.getPage());
+
+        return response;
     }
 }

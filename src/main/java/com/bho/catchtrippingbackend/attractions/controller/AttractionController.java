@@ -2,7 +2,9 @@ package com.bho.catchtrippingbackend.attractions.controller;
 
 import com.bho.catchtrippingbackend.attractions.dto.ContentDetails;
 import com.bho.catchtrippingbackend.attractions.dto.request.HotPlaceRequest;
+import com.bho.catchtrippingbackend.attractions.dto.request.NearbyAttractionsRequest;
 import com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse;
+import com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse;
 import com.bho.catchtrippingbackend.attractions.service.AttractionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,5 +42,22 @@ public class AttractionController {
         }
     }
 
+    @GetMapping("/nearby")
+    public ResponseEntity<NearbyAttractionsResponse> getNearbyAttractions(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam double distance,
+            @RequestParam int page,
+            @RequestParam int pageSize
+    ) {
+        NearbyAttractionsRequest request = new NearbyAttractionsRequest();
+        request.setLatitude(latitude);
+        request.setLongitude(longitude);
+        request.setDistance(distance);
+        request.setPage(page);
+        request.setPageSize(pageSize);
 
+        NearbyAttractionsResponse response = attractionService.getNearbyAttractions(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

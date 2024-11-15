@@ -44,6 +44,15 @@
         <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes" select="getCategoriesByContentId" column="contentid"/>
     </resultMap>
 
+    <!-- 결과 매핑 -->
+    <resultMap id="AttractionSummaryMap" type="com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse$AttractionSummary">
+        <id property="contentId" column="contentid"/>
+        <result property="title" column="title"/>
+        <result property="firstImage" column="firstimage"/>
+        <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes"
+                    select="com.bho.catchtrippingbackend.attractions.dao.CategoryCodesDao.getCategoriesByContentId" column="contentid"/>
+    </resultMap>
+
     <!-- ID로 데이터 조회 -->
     <select id="findById" parameterType="int" resultMap="AreaBasedContentsMap">
         SELECT * FROM area_based_contents WHERE contentid = #{contentId}
@@ -259,17 +268,43 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <!-- Nested select to get categories by content ID -->
-    <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">
-        SELECT cc.category_code, cc.category_name
-        FROM category_codes cc
-        WHERE cc.category_code IN (
-            SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}
-            UNION
-            SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}
-            UNION
-            SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}
-        )
+<!--    &lt;!&ndash; Nested select to get categories by content ID &ndash;&gt;-->
+<!--    <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">-->
+<!--        SELECT cc.category_code, cc.category_name-->
+<!--        FROM category_codes cc-->
+<!--        WHERE cc.category_code IN (-->
+<!--            SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}-->
+<!--            UNION-->
+<!--            SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}-->
+<!--            UNION-->
+<!--            SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}-->
+<!--        )-->
+<!--    </select>-->
+
+    <!-- findNearbyAttractions 쿼리 -->
+    <select id="findNearbyAttractions" parameterType="map" resultMap="AttractionSummaryMap">
+        SELECT
+        abc.contentid,
+        abc.title,
+        abc.firstimage
+        FROM area_based_contents abc
+        WHERE
+        ST_Distance_Sphere(
+        POINT(abc.mapx, abc.mapy),
+        POINT(#{longitude}, #{latitude})
+        ) &lt; #{distance} * 1000
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- countNearbyAttractions 쿼리 -->
+    <select id="countNearbyAttractions" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM area_based_contents abc
+        WHERE
+        ST_Distance_Sphere(
+        POINT(abc.mapx, abc.mapy),
+        POINT(#{longitude}, #{latitude})
+        ) &lt; #{distance} * 1000
     </select>
 
 </mapper>
