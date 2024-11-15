@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bho.catchtrippingbackend.attractions.dao.AreaBasedContentsDao">
+
+    <!-- AreaBasedContents resultMap 정의 -->
+    <resultMap id="AreaBasedContentsMap" type="com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents">
+        <id property="contentid" column="contentid"/>
+        <result property="addr1" column="addr1"/>
+        <result property="addr2" column="addr2"/>
+        <result property="areacode" column="areacode"/>
+        <result property="booktour" column="booktour"/>
+        <result property="cat1" column="cat1"/>
+        <result property="cat2" column="cat2"/>
+        <result property="cat3" column="cat3"/>
+        <result property="contenttypeid" column="contenttypeid"/>
+        <result property="createdtime" column="createdtime"/>
+        <result property="firstimage" column="firstimage"/>
+        <result property="firstimage2" column="firstimage2"/>
+        <result property="cpyrhtDivCd" column="cpyrht_div_cd"/>
+        <result property="mapx" column="mapx"/>
+        <result property="mapy" column="mapy"/>
+        <result property="mlevel" column="mlevel"/>
+        <result property="modifiedtime" column="modifiedtime"/>
+        <result property="sigungucode" column="sigungucode"/>
+        <result property="tel" column="tel"/>
+        <result property="title" column="title"/>
+        <result property="zipcode" column="zipcode"/>
+    </resultMap>
+
+    <!-- ResultMap for CategoryCodes -->
+    <resultMap id="CategoryCodesMap" type="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes">
+        <id property="categoryCode" column="category_code"/>
+        <result property="categoryName" column="category_name"/>
+    </resultMap>
+
+    <!-- ResultMap for HotPlaceResponse -->
+    <resultMap id="HotPlaceResponseMap" type="com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse">
+        <id property="contentId" column="contentid"/>
+        <result property="title" column="title"/>
+        <result property="firstImage" column="firstimage"/>
+        <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes" select="getCategoriesByContentId" column="contentid"/>
+    </resultMap>
+
+    <!-- ID로 데이터 조회 -->
+    <select id="findById" parameterType="int" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents WHERE contentid = #{contentId}
+    </select>
+
+    <!-- 모든 데이터 조회 -->
+    <select id="findAll" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents
+    </select>
+
+    <!-- 페이징된 데이터 조회 -->
+    <select id="findAllWithPagination" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents
+                          LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 총 데이터 개수 조회 -->
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*) FROM area_based_contents
+    </select>
+
+    <!-- 특정 지역 코드로 조회 -->
+    <select id="findByAreaCode" parameterType="int" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents WHERE areacode = #{areaCode}
+    </select>
+
+    <!-- 특정 시군구 코드로 조회 -->
+    <select id="findBySigunguCode" parameterType="int" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents WHERE sigungucode = #{sigunguCode}
+    </select>
+
+    <!-- 지역 코드와 시군구 코드로 조회 -->
+    <select id="findByAreaCodeAndSigunguCode" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents
+        WHERE areacode = #{areaCode} AND sigungucode = #{sigunguCode}
+    </select>
+
+    <!-- 카테고리로 조회 (cat1, cat2, cat3 조합) -->
+    <select id="findByCategories" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents
+        <where>
+            <if test="cat1 != null">
+                AND cat1 = #{cat1}
+            </if>
+            <if test="cat2 != null">
+                AND cat2 = #{cat2}
+            </if>
+            <if test="cat3 != null">
+                AND cat3 = #{cat3}
+            </if>
+        </where>
+    </select>
+
+    <!-- 타이틀을 포함하는 데이터를 조회 (검색어 기반) -->
+    <select id="findByTitleContaining" parameterType="string" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents WHERE title LIKE CONCAT('%', #{title}, '%')
+    </select>
+
+    <!-- 좌표 범위로 조회 (지도의 특정 구역 내 검색) -->
+    <select id="findByMapCoordinates" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents
+        WHERE mapx BETWEEN #{minX} AND #{maxX}
+          AND mapy BETWEEN #{minY} AND #{maxY}
+    </select>
+
+    <!-- 생성일 범위로 조회 -->
+    <select id="findByCreatedTimeBetween" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents
+        WHERE createdtime BETWEEN #{start} AND #{end}
+    </select>
+
+    <!-- 수정일 범위로 조회 -->
+    <select id="findByModifiedTimeBetween" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents
+        WHERE modifiedtime BETWEEN #{start} AND #{end}
+    </select>
+
+    <!-- 복합 검색 메서드 -->
+    <select id="searchAttractions" parameterType="com.bho.catchtrippingbackend.attractions.dto.AttractionSearchCriteria" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents
+        <where>
+            <if test="areaCode != null">
+                AND areacode = #{areaCode}
+            </if>
+            <if test="sigunguCode != null">
+                AND sigungucode = #{sigunguCode}
+            </if>
+            <if test="cat1 != null">
+                AND cat1 = #{cat1}
+            </if>
+            <if test="cat2 != null">
+                AND cat2 = #{cat2}
+            </if>
+            <if test="cat3 != null">
+                AND cat3 = #{cat3}
+            </if>
+            <if test="titleKeyword != null">
+                AND title LIKE CONCAT('%', #{titleKeyword}, '%')
+            </if>
+            <if test="minX != null and maxX != null and minY != null and maxY != null">
+                AND mapx BETWEEN #{minX} AND #{maxX}
+                AND mapy BETWEEN #{minY} AND #{maxY}
+            </if>
+            <if test="createdTimeStart != null and createdTimeEnd != null">
+                AND createdtime BETWEEN #{createdTimeStart} AND #{createdTimeEnd}
+            </if>
+            <if test="modifiedTimeStart != null and modifiedTimeEnd != null">
+                AND modifiedtime BETWEEN #{modifiedTimeStart} AND #{modifiedTimeEnd}
+            </if>
+        </where>
+    </select>
+
+    <!-- 복합 검색 결과의 총 개수 조회 -->
+    <select id="countSearchAttractions" parameterType="com.bho.catchtrippingbackend.attractions.dto.AttractionSearchCriteria" resultType="int">
+        SELECT COUNT(*) FROM area_based_contents
+        <where>
+            <if test="areaCode != null">
+                AND areacode = #{areaCode}
+            </if>
+            <if test="sigunguCode != null">
+                AND sigungucode = #{sigunguCode}
+            </if>
+            <if test="cat1 != null">
+                AND cat1 = #{cat1}
+            </if>
+            <if test="cat2 != null">
+                AND cat2 = #{cat2}
+            </if>
+            <if test="cat3 != null">
+                AND cat3 = #{cat3}
+            </if>
+            <if test="titleKeyword != null">
+                AND title LIKE CONCAT('%', #{titleKeyword}, '%')
+            </if>
+            <if test="minX != null and maxX != null and minY != null and maxY != null">
+                AND mapx BETWEEN #{minX} AND #{maxX}
+                AND mapy BETWEEN #{minY} AND #{maxY}
+            </if>
+            <if test="createdTimeStart != null and createdTimeEnd != null">
+                AND createdtime BETWEEN #{createdTimeStart} AND #{createdTimeEnd}
+            </if>
+            <if test="modifiedTimeStart != null and modifiedTimeEnd != null">
+                AND modifiedtime BETWEEN #{modifiedTimeStart} AND #{modifiedTimeEnd}
+            </if>
+        </where>
+    </select>
+
+    <!-- 복합 검색의 페이징된 데이터 조회 -->
+    <select id="searchAttractionsWithPagination" parameterType="map" resultMap="AreaBasedContentsMap">
+        SELECT * FROM area_based_contents
+        <where>
+            <if test="criteria.areaCode != null">
+                AND areacode = #{criteria.areaCode}
+            </if>
+            <if test="criteria.sigunguCode != null">
+                AND sigungucode = #{criteria.sigunguCode}
+            </if>
+            <if test="criteria.cat1 != null">
+                AND cat1 = #{criteria.cat1}
+            </if>
+            <if test="criteria.cat2 != null">
+                AND cat2 = #{criteria.cat2}
+            </if>
+            <if test="criteria.cat3 != null">
+                AND cat3 = #{criteria.cat3}
+            </if>
+            <if test="criteria.titleKeyword != null">
+                AND title LIKE CONCAT('%', #{criteria.titleKeyword}, '%')
+            </if>
+            <if test="criteria.minX != null and criteria.maxX != null and criteria.minY != null and criteria.maxY != null">
+                AND mapx BETWEEN #{criteria.minX} AND #{criteria.maxX}
+                AND mapy BETWEEN #{criteria.minY} AND #{criteria.maxY}
+            </if>
+            <if test="criteria.createdTimeStart != null and criteria.createdTimeEnd != null">
+                AND createdtime BETWEEN #{criteria.createdTimeStart} AND #{criteria.createdTimeEnd}
+            </if>
+            <if test="criteria.modifiedTimeStart != null and criteria.modifiedTimeEnd != null">
+                AND modifiedtime BETWEEN #{criteria.modifiedTimeStart} AND #{criteria.modifiedTimeEnd}
+            </if>
+        </where>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- HotPlace 조회 메서드 -->
+    <select id="findHotPlaces" resultMap="HotPlaceResponseMap">
+        SELECT
+        abc.title,
+        abc.firstimage,
+        abc.contentid
+        FROM area_based_contents abc
+        WHERE
+        <choose>
+            <when test="hotPlaceType == 'Restaurant'">
+                abc.contenttypeid = 39
+            </when>
+            <when test="hotPlaceType == 'Place'">
+                abc.contenttypeid IN (12, 14, 15, 28, 32, 38)
+            </when>
+            <when test="hotPlaceType == 'Accommodation'">
+                abc.contenttypeid = 32
+            </when>
+            <otherwise>
+                1 = 1
+            </otherwise>
+        </choose>
+        AND abc.areacode = #{regionCode}
+        <if test="sigunguCodes != null and sigunguCodes.size() > 0">
+            AND abc.sigungucode IN
+            <foreach item="code" collection="sigunguCodes" open="(" separator="," close=")">
+                #{code}
+            </foreach>
+        </if>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- Nested select to get categories by content ID -->
+    <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">
+        SELECT cc.category_code, cc.category_name
+        FROM category_codes cc
+        WHERE cc.category_code IN (
+            SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}
+            UNION
+            SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}
+            UNION
+            SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}
+        )
+    </select>
+
+</mapper>
