@@ -66,15 +66,33 @@ public class BoardService {
         User user = getUserByName(userDetails.getUsername());
         Board board = getBoardById(requestDto.boardId());
 
-        validateBoardLikeDuplication(user, requestDto.boardId());
+        validateBoardLikeDuplication(user, board);
 
         BoardLike boardLike = requestDto.from(user, board);
 
         boardLikeDao.save(boardLike);
     }
 
-    private void validateBoardLikeDuplication(User user, Long boardId) {
-        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(user.getUserId(), boardId);
+    @Transactional
+    public void deleteLike(UserDetails userDetails, BoardLikeRequestDto requestDto) {
+        User user = getUserByName(userDetails.getUsername());
+        Board board = getBoardById(requestDto.boardId());
+
+        validateBoardLikeExistence(user, board);
+
+        boardLikeDao.deleteByUserIdAndBoardId(user.getUserId(), board.getId());
+    }
+
+    private void validateBoardLikeExistence(User user, Board board) {
+        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(user.getUserId(), board.getId());
+
+        if (result == 0) {
+            throw new RuntimeException("좋아요가 존재하지 않습니다.");
+        }
+    }
+
+    private void validateBoardLikeDuplication(User user, Board board) {
+        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(user.getUserId(), board.getId());
 
         if (result > 0) {
             throw new RuntimeException("boardLike 중복");

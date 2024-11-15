@@ -40,16 +40,10 @@
         VALUES (#{user.userId}, #{board.id}, NOW())
     </insert>
 
-    <!-- 특정 유저의 좋아요 리스트 조회 -->
-    <select id="findLikesByUserId" parameterType="int" resultMap="BoardLikeResultMap">
-        SELECT
-        bl.id, bl.created_at,
-        u.user_id, u.user_name, u.user_email, u.user_password, u.profile_image, u.created_at AS user_created_at,
-        b.id AS board_id, b.content AS board_content, b.created_at AS board_created_at, b.updated_at AS board_updated_at
-        FROM board_like bl
-        JOIN user u ON bl.user_id = u.user_id
-        JOIN board b ON bl.board_id = b.id
-        WHERE bl.user_id = #{userId}
-    </select>
+    <!-- 좋아요 삭제 쿼리 -->
+    <delete id="deleteByUserIdAndBoardId" parameterType="map">
+        DELETE FROM board_like
+        WHERE user_id = #{userId} AND board_id = #{boardId}
+    </delete>
 
 </mapper>

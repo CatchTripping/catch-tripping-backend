@@ -64,4 +64,13 @@ public class BoardController {
 
         return ResponseEntity.ok("좋아요 추가 완료");
     }
+
+    @DeleteMapping("/like")
+    public ResponseEntity<String> deleteLike(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody BoardLikeRequestDto requestDto) {
+        boardService.deleteLike(userDetails, requestDto);
+
+        return ResponseEntity.ok("좋아요 삭제 완료");
+    }
 }
