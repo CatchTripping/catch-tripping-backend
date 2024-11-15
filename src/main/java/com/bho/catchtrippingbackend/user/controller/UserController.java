@@ -1,5 +1,8 @@
 package com.bho.catchtrippingbackend.user.controller;
 
+import com.bho.catchtrippingbackend.error.SystemException;
+import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
+import com.bho.catchtrippingbackend.error.response.CustomResponse;
 import com.bho.catchtrippingbackend.user.dto.*;
 import com.bho.catchtrippingbackend.user.entity.User;
 import com.bho.catchtrippingbackend.user.service.UserService;
@@ -24,10 +27,10 @@ public class UserController {
      * @return 등록된 사용자 ID를 포함한 응답 DTO
      */
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterResponseDto> registerUser(@Valid @RequestBody UserRegisterRequestDto request) {
+    public ResponseEntity<CustomResponse<UserRegisterResponseDto>> registerUser(@Valid @RequestBody UserRegisterRequestDto request) {
         UserRegisterResponseDto response = userService.registerUser(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CustomResponse.success(response));
     }
 
     /**
@@ -37,11 +40,13 @@ public class UserController {
      * @return 사용 가능 여부 (true: 사용 가능, false: 중복)
      */
     @GetMapping("/check-username")
-    public ResponseEntity<CheckUsernameResponseDto> checkUsername(@RequestParam("userName") String userName) {
+    public ResponseEntity<CustomResponse<CheckUsernameResponseDto>> checkUsername(@RequestParam("userName") String userName) {
         boolean isAvailable = userService.isUsernameAvailable(userName);
+        // 상태 메시지와 데이터를 포함한 응답 반환
         CheckUsernameResponseDto response = new CheckUsernameResponseDto(isAvailable);
+        String message = isAvailable ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.";
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CustomResponse.success(response, message));
     }
 
     /**
@@ -51,10 +56,10 @@ public class UserController {
      * @return 사용 가능 여부 (true: 사용 가능, false: 이미 사용 중)
      */
     @GetMapping("/check-email")
-    public ResponseEntity<CheckEmailResponseDto> checkEmailAvailability(@RequestParam("userEmail") String userEmail) {
+    public ResponseEntity<CustomResponse<CheckEmailResponseDto>> checkEmailAvailability(@RequestParam("userEmail") String userEmail) {
         boolean isAvailable = userService.isEmailAvailable(userEmail);
         CheckEmailResponseDto response = new CheckEmailResponseDto(isAvailable);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(CustomResponse.success(response));
     }
 
     /**
@@ -65,6 +70,14 @@ public class UserController {
      */
     @GetMapping("/check")
     public ResponseEntity<CheckLoginResponseDto> checkLogin(Authentication authentication) {
+//        // 인증되지 않은 사용자 처리
+//        if (authentication == null || !authentication.isAuthenticated()) {
+//            throw new SystemException(ClientErrorCode.NOT_AUTHORIZED);
+//        }
+//
+//        // 인증된 사용자: 성공 응답
+//        CheckLoginResponseDto response = new CheckLoginResponseDto(true);
+//        return ResponseEntity.ok(CustomResponse.success(response));
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated();
         CheckLoginResponseDto response = new CheckLoginResponseDto(isAuthenticated);
 
@@ -78,14 +91,20 @@ public class UserController {
      * @return 인증된 사용자 정보 (userName, userEmail, profileImage, 권한 목록)
      */
     @GetMapping("/userinfo")
-    public ResponseEntity<UserDto> getUserInfo(Authentication authentication) {
+    public ResponseEntity<CustomResponse<UserDto>> getUserInfo(Authentication authentication) {
+
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
         User userDetails = userService.findUserByUsername(user.getUsername());
+
+        if (userDetails == null) {
+            // 유효한 사용자 정보가 없다면 404
+            throw new SystemException(ClientErrorCode.USER_NOT_FOUND);
+        }
 
         UserDto userInfo = UserDto.fromEntity(
                 userDetails,
                 user.getAuthorities()
         );
-        return ResponseEntity.ok(userInfo);
+        return ResponseEntity.ok(CustomResponse.success(userInfo));
     }
 }

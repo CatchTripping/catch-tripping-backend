@@ -4,6 +4,7 @@ spring:
   profiles:
     active: mysql
 
+
 server:
   port: 8080
   servlet:
@@ -12,7 +13,11 @@ server:
         secure: false
         http-only: true
         same-site: lax
-      timeout: 1800 # 30분
+      timeout: 60 #1800 # 30분
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 logging:
   level:
