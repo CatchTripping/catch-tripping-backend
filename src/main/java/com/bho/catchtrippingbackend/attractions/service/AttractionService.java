@@ -82,4 +82,7 @@ public interface AttractionService {
     List<ContentTypes> searchContentTypesByName(String partialName); // 부분 일치하는 콘텐츠 타입 이름으로 검색
 
     List<HotPlaceResponse> getHotPlaces(HotPlaceRequest request);
+
+    // 콘텐츠 상세 정보를 가져오는 메서드
+    ContentDetails getContentDetails(int contentId) throws Exception;
 }

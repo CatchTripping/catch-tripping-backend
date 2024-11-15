@@ -5,9 +5,17 @@ import com.bho.catchtrippingbackend.attractions.dto.*;
 import com.bho.catchtrippingbackend.attractions.dto.request.HotPlaceRequest;
 import com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse;
 import com.bho.catchtrippingbackend.attractions.service.AttractionService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,18 +27,27 @@ public class AttractionServiceImpl implements AttractionService {
     private final SigunguCodesDao sigunguCodesDao;
     private final CategoryCodesDao categoryCodesDao;
     private final ContentTypesDao contentTypesDao;
+    private final ContentDetailsDao contentDetailsDao;
+
+    // 설정 파일에서 API 키와 베이스 URL을 가져옵니다.
+    @Value("${tourapi.serviceKey}")
+    private String serviceKey;
+
+    @Value("${tourapi.baseUrl}")
+    private String baseUrl;
 
     @Autowired
     public AttractionServiceImpl(AreaBasedContentsDao areaBasedContentsDao,
                                  AreaCodesDao areaCodesDao,
                                  SigunguCodesDao sigunguCodesDao,
                                  CategoryCodesDao categoryCodesDao,
-                                 ContentTypesDao contentTypesDao) {
+                                 ContentTypesDao contentTypesDao, ContentDetailsDao contentDetailsDao) {
         this.areaBasedContentsDao = areaBasedContentsDao;
         this.areaCodesDao = areaCodesDao;
         this.sigunguCodesDao = sigunguCodesDao;
         this.categoryCodesDao = categoryCodesDao;
         this.contentTypesDao = contentTypesDao;
+        this.contentDetailsDao=contentDetailsDao;
     }
 
     // AreaBasedContents 관련 메서드 구현
@@ -216,5 +233,112 @@ public class AttractionServiceImpl implements AttractionService {
                 limit,
                 offset
         );
+    }
+
+    @Override
+    public ContentDetails getContentDetails(int contentId) throws Exception {
+        // 데이터베이스에서 콘텐츠 상세 정보 확인
+        ContentDetails contentDetails = contentDetailsDao.findByContentId(contentId);
+
+        if (contentDetails != null) {
+            System.out.println("DB에 존재");
+            return contentDetails;
+        } else {
+            // OpenAPI에서 가져오기
+            contentDetails = fetchContentDetailsFromAPI(contentId);
+
+            if (contentDetails != null) {
+                // 데이터베이스에 저장
+                contentDetailsDao.insertContentDetails(contentDetails);
+                return contentDetails;
+            } else {
+                throw new Exception("API에서 콘텐츠 상세 정보를 가져오지 못했습니다.");
+            }
+        }
+    }
+
+    private ContentDetails fetchContentDetailsFromAPI(int contentId) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+
+        // 필요한 파라미터로 URL 빌드
+        URI url = UriComponentsBuilder.fromHttpUrl(baseUrl)
+                .queryParam("serviceKey", serviceKey)
+                .queryParam("MobileOS", "WIN")
+                .queryParam("MobileApp", "catchtripping")
+                .queryParam("contentId", contentId)
+                .queryParam("defaultYN", "Y")
+                .queryParam("firstImageYN", "Y")
+                .queryParam("areacodeYN", "Y")
+                .queryParam("catcodeYN", "Y")
+                .queryParam("addrinfoYN", "Y")
+                .queryParam("mapinfoYN", "Y")
+                .queryParam("overviewYN", "Y")
+                .queryParam("_type", "json") // JSON 응답을 받기 위해
+                .build(true) // 인코딩을 여기서 처리하므로 false로 설정
+                .toUri();
+
+        // URL 출력하여 확인
+        System.out.println("요청 URL: " + url);
+
+        // API 호출
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            // JSON 응답 파싱
+            String responseBody = response.getBody();
+
+            // API 응답 출력하여 확인
+            System.out.println("API 응답: " + responseBody);
+
+            // JSON 파싱하여 필요한 필드 추출
+            ContentDetails contentDetails = parseContentDetailsFromJson(responseBody, contentId);
+
+            System.out.println("출력");
+            System.out.println(contentDetails);
+            return contentDetails;
+        } else {
+            throw new Exception("API 호출 실패: 상태 코드 " + response.getStatusCode());
+        }
+    }
+
+    private ContentDetails parseContentDetailsFromJson(String json, int contentId) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // 응답 전체를 출력하여 확인
+        System.out.println("API 응답: " + json);
+
+        JsonNode rootNode = objectMapper.readTree(json);
+        JsonNode responseNode = rootNode.path("response");
+        JsonNode headerNode = responseNode.path("header");
+        String resultCode = headerNode.path("resultCode").asText();
+
+        if (!"0000".equals(resultCode)) {
+            String resultMsg = headerNode.path("resultMsg").asText();
+            throw new Exception("API 에러: " + resultMsg);
+        }
+
+        JsonNode bodyNode = responseNode.path("body");
+        JsonNode itemsNode = bodyNode.path("items");
+        JsonNode itemNode = itemsNode.path("item");
+
+        // **item이 배열인지 객체인지 확인**
+        if (itemNode.isArray()) {
+            if (!itemNode.isEmpty()) {
+                itemNode = itemNode.get(0); // 첫 번째 아이템 사용
+            } else {
+                throw new Exception("API 응답에 item이 없습니다.");
+            }
+        }
+
+        String overview = itemNode.path("overview").asText();
+        String homepage = itemNode.path("homepage").asText();
+
+        // ContentDetails 객체 생성
+        ContentDetails contentDetails = new ContentDetails();
+        contentDetails.setContentId(contentId);
+        contentDetails.setOverview(overview);
+        contentDetails.setHomepage(homepage);
+
+        return contentDetails;
     }
 }
