@@ -72,7 +72,7 @@ public class SecurityConfig {
                 )
                 .rememberMe(rememberMe -> rememberMe
                         .key("uniqueAndSecret")
-                        .tokenValiditySeconds(120) // 1주
+                        .tokenValiditySeconds(604800) // 1주
                         .userDetailsService(customUserDetailsService)
                 )
                 .sessionManagement((session) -> session
