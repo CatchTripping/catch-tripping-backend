@@ -31,7 +31,7 @@
     <select id="findBoardById" parameterType="Long" resultMap="BoardResultMap">
         SELECT
         b.id, b.content, b.created_at, b.updated_at,
-        u.user_name, u.profile_image, u.created_at AS user_created_at
+        u.user_id, u.user_name, u.profile_image, u.created_at AS user_created_at
         FROM board b
         JOIN user u ON b.user_id = u.user_id
         WHERE b.id = #{boardId}

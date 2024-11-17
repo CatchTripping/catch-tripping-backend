@@ -17,7 +17,8 @@ public class User {
     private LocalDateTime createdAt;
 
     @Builder
-    public User(String userName, String userPassword, String userEmail, String profileImage) {
+    public User(int userId, String userName, String userPassword, String userEmail, String profileImage) {
+        this.userId = userId;
         this.userName = userName;
         this.userPassword = userPassword;
         this.userEmail = userEmail;
