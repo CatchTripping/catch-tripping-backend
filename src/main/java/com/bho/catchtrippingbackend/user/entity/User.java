@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 //@AllArgsConstructor
 @Getter
 public class User {
-    private int userId;
+    private Long userId;
     private String userName;
     private String userPassword;
     private String userEmail;
@@ -17,7 +17,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @Builder
-    public User(int userId, String userName, String userPassword, String userEmail, String profileImage) {
+    public User(Long userId, String userName, String userPassword, String userEmail, String profileImage) {
         this.userId = userId;
         this.userName = userName;
         this.userPassword = userPassword;

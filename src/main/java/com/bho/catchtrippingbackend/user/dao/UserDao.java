@@ -21,7 +21,7 @@ public interface UserDao {
             @Result(property = "userPassword", column = "user_password"),
             @Result(property = "userEmail", column = "user_email")
     })
-    User findUserById(int userId);
+    User findUserById(Long userId);
 
     @Select("SELECT count(*) FROM user WHERE user_name = #{userName}")
     int countUsersByUserName(String userName);

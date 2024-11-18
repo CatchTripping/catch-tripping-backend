@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface BoardLikeDao {
-    int findBoardLikeByBoardIdAndUserId(int userId, Long boardId);
+    int findBoardLikeByBoardIdAndUserId(Long userId, Long boardId);
     int save(BoardLike boardLike);
-    int deleteByUserIdAndBoardId(int userId, Long boardId);
+    int deleteByUserIdAndBoardId(Long userId, Long boardId);
 }
