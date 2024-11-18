@@ -58,7 +58,7 @@ public class BoardController {
 
     @PostMapping("/like")
     public ResponseEntity<String> addLike(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody BoardLikeRequestDto requestDto) {
         boardService.addLike(userDetails, requestDto);
 
@@ -67,7 +67,7 @@ public class BoardController {
 
     @DeleteMapping("/like")
     public ResponseEntity<String> deleteLike(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody BoardLikeRequestDto requestDto) {
         boardService.deleteLike(userDetails, requestDto);
 
