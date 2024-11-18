@@ -44,14 +44,14 @@
         <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes" select="getCategoriesByContentId" column="contentid"/>
     </resultMap>
 
-<!--    &lt;!&ndash; 결과 매핑 &ndash;&gt;-->
-<!--    <resultMap id="AttractionSummaryMap" type="com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse$AttractionSummary">-->
-<!--        <id property="contentId" column="contentid"/>-->
-<!--        <result property="title" column="title"/>-->
-<!--        <result property="firstImage" column="firstimage"/>-->
-<!--        <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes"-->
-<!--                    select="com.bho.catchtrippingbackend.attractions.dao.CategoryCodesDao.getCategoriesByContentId" column="contentid"/>-->
-<!--    </resultMap>-->
+    <!--    &lt;!&ndash; 결과 매핑 &ndash;&gt;-->
+    <!--    <resultMap id="AttractionSummaryMap" type="com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse$AttractionSummary">-->
+    <!--        <id property="contentId" column="contentid"/>-->
+    <!--        <result property="title" column="title"/>-->
+    <!--        <result property="firstImage" column="firstimage"/>-->
+    <!--        <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes"-->
+    <!--                    select="com.bho.catchtrippingbackend.attractions.dao.CategoryCodesDao.getCategoriesByContentId" column="contentid"/>-->
+    <!--    </resultMap>-->
 
     <!-- ResultMap 수정 -->
     <resultMap id="AttractionSummaryMap" type="com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse$AttractionSummary">
@@ -288,57 +288,57 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-<!--    &lt;!&ndash; Nested select to get categories by content ID &ndash;&gt;-->
-<!--    <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">-->
-<!--        SELECT cc.category_code, cc.category_name-->
-<!--        FROM category_codes cc-->
-<!--        WHERE cc.category_code IN (-->
-<!--            SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}-->
-<!--            UNION-->
-<!--            SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}-->
-<!--            UNION-->
-<!--            SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}-->
-<!--        )-->
-<!--    </select>-->
+        <!-- Nested select to get categories by content ID -->
+        <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">
+            SELECT cc.category_code, cc.category_name
+            FROM category_codes cc
+            WHERE cc.category_code IN (
+                SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}
+                UNION
+                SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}
+                UNION
+                SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}
+            )
+        </select>
 
-<!--    &lt;!&ndash; findNearbyAttractions 쿼리 &ndash;&gt;-->
-<!--    <select id="findNearbyAttractions" parameterType="map" resultMap="AttractionSummaryMap">-->
-<!--        SELECT-->
-<!--        abc.contentid,-->
-<!--        abc.title,-->
-<!--        abc.firstimage-->
-<!--        FROM area_based_contents abc-->
-<!--        WHERE-->
-<!--        ST_Distance_Sphere(-->
-<!--        POINT(abc.mapx, abc.mapy),-->
-<!--        POINT(#{longitude}, #{latitude})-->
-<!--        ) &lt; #{distance} * 1000-->
-<!--        LIMIT #{limit} OFFSET #{offset}-->
-<!--    </select>-->
+    <!--    &lt;!&ndash; findNearbyAttractions 쿼리 &ndash;&gt;-->
+    <!--    <select id="findNearbyAttractions" parameterType="map" resultMap="AttractionSummaryMap">-->
+    <!--        SELECT-->
+    <!--        abc.contentid,-->
+    <!--        abc.title,-->
+    <!--        abc.firstimage-->
+    <!--        FROM area_based_contents abc-->
+    <!--        WHERE-->
+    <!--        ST_Distance_Sphere(-->
+    <!--        POINT(abc.mapx, abc.mapy),-->
+    <!--        POINT(#{longitude}, #{latitude})-->
+    <!--        ) &lt; #{distance} * 1000-->
+    <!--        LIMIT #{limit} OFFSET #{offset}-->
+    <!--    </select>-->
 
     <!-- findNearbyAttractions 쿼리 수정 -->
     <select id="findNearbyAttractions" parameterType="map" resultMap="AttractionSummaryMap">
         SELECT
-        abc.contentid,
-        abc.title,
-        abc.firstimage,
-        abc.mapx,
-        abc.mapy,
-        abc.mlevel,
-        abc.tel,
-        abc.zipcode,
-        abc.addr1,
-        abc.addr2,
-        abc.contenttypeid,
-        ct.content_type_name
+            abc.contentid,
+            abc.title,
+            abc.firstimage,
+            abc.mapx,
+            abc.mapy,
+            abc.mlevel,
+            abc.tel,
+            abc.zipcode,
+            abc.addr1,
+            abc.addr2,
+            abc.contenttypeid,
+            ct.content_type_name
         FROM area_based_contents abc
-        LEFT JOIN content_types ct ON abc.contenttypeid = ct.content_type_id
+                 LEFT JOIN content_types ct ON abc.contenttypeid = ct.content_type_id
         WHERE
-        ST_Distance_Sphere(
-        POINT(abc.mapx, abc.mapy),
-        POINT(#{longitude}, #{latitude})
-        ) &lt; #{distance} * 1000
-        LIMIT #{limit} OFFSET #{offset}
+            ST_Distance_Sphere(
+                    POINT(abc.mapx, abc.mapy),
+                    POINT(#{longitude}, #{latitude})
+            ) &lt; #{distance} * 1000
+            LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <!-- countNearbyAttractions 쿼리 -->
@@ -346,10 +346,10 @@
         SELECT COUNT(*)
         FROM area_based_contents abc
         WHERE
-        ST_Distance_Sphere(
-        POINT(abc.mapx, abc.mapy),
-        POINT(#{longitude}, #{latitude})
-        ) &lt; #{distance} * 1000
+            ST_Distance_Sphere(
+                    POINT(abc.mapx, abc.mapy),
+                    POINT(#{longitude}, #{latitude})
+            ) &lt; #{distance} * 1000
     </select>
 
 </mapper>

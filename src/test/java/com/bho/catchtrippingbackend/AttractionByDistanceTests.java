@@ -6,14 +6,21 @@ import com.bho.catchtrippingbackend.attractions.dto.CategoryCodes;
 import com.bho.catchtrippingbackend.attractions.dto.request.NearbyAttractionsRequest;
 import com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse;
 import com.bho.catchtrippingbackend.attractions.service.AttractionService;
+import com.bho.catchtrippingbackend.security.SecurityConfig;
+import groovy.util.logging.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
 @SpringBootTest
+
 class AttractionByDistanceTests {
+
+    private static final Logger logger = LoggerFactory.getLogger(AttractionByDistanceTests.class);
 
     @Autowired
     private AttractionService attractionService;
@@ -29,6 +36,8 @@ class AttractionByDistanceTests {
 
     @Test
     public void testNearbyAttractions() {
+        long l = System.currentTimeMillis();
+        logger.info("{}", l);
 //        List<CategoryCodes> list=dao2.getCategoriesByContentId(125266);
 //        for(CategoryCodes c:list){
 //            System.out.println(c);
@@ -76,5 +85,7 @@ class AttractionByDistanceTests {
             System.out.println("에러 발생: " + e.getMessage());
             e.printStackTrace();
         }
+        long k = System.currentTimeMillis();
+        logger.info("{}", k);
     }
 }
