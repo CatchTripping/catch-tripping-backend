@@ -8,6 +8,10 @@ import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
 import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.board.entity.BoardLike;
+import com.bho.catchtrippingbackend.error.SystemException;
+import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
+import com.bho.catchtrippingbackend.error.code.ServerErrorCode;
+import com.bho.catchtrippingbackend.error.response.CustomResponse;
 import com.bho.catchtrippingbackend.security.CustomUserDetails;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
@@ -89,7 +93,7 @@ public class BoardService {
         int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(userId, boardId);
 
         if (result == 0) {
-            throw new RuntimeException("좋아요가 존재하지 않습니다.");
+            throw new SystemException(ClientErrorCode.BOARD_LIKE_NOT_FOUND);
         }
     }
 
@@ -97,14 +101,14 @@ public class BoardService {
         int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(userId, boardId);
 
         if (result > 0) {
-            throw new RuntimeException("boardLike 중복");
+            throw new SystemException(ClientErrorCode.BOARD_LIKE_DUPLICATED);
         }
     }
 
     private void validateBoardAuthor(Long userId, Board board) {
         boolean isAuthorized = userId == board.getUser().getUserId();
         if (!isAuthorized) {
-            throw new RuntimeException("권한 없음");
+            throw new SystemException(ClientErrorCode.FORBIDDEN_USER_ACCESS);
         }
     }
 
@@ -112,7 +116,7 @@ public class BoardService {
         Board board = boardDao.findBoardById(boardId);
         if (board == null) {
             log.error("Board not found with ID: {}", boardId);
-            throw new RuntimeException("Board not found with ID: " + boardId);
+            throw new SystemException(ClientErrorCode.BOARD_NOT_FOUND);
         }
         log.info("Board found with ID: {}", boardId);
         return board;
@@ -124,8 +128,7 @@ public class BoardService {
         User user = userDao.findUserById(userId);
         if (user == null) {
             log.error("User not found with name: {}", userId);
-            // exception 추후 수정
-            throw new RuntimeException("User not found with userId: " + userId);
+            throw new SystemException(ClientErrorCode.USER_NOT_FOUND);
         }
         log.info("userId으로 유저 db에서 조회 후 반환 : {}", user.getUserName());
         return user;
@@ -137,7 +140,7 @@ public class BoardService {
         int result = boardDao.save(board);
         log.info("board 저장 잘됐으면 1 반환 : {}", result);
         if (result != 1) {
-            throw new RuntimeException("Saving board failed");
+            throw new SystemException(ServerErrorCode.DATABASE_ERROR);
         }
     }
 }

@@ -16,7 +16,14 @@ public enum ClientErrorCode implements ErrorCodeModel{
     USER_NOT_FOUND(404, "USER_NOT_FOUND", "해당 사용자를 찾을 수 없습니다."),
     NOT_AUTHORIZED(401, "NOT_AUTHORIZED", "로그인이 필요합니다."),
     AUTHENTICATION_FAILED(401, "AUTHENTICATION_FAILED", "인증에 실패했습니다."),
-    FORBIDDEN_USER_ACCESS(403, "FORBIDDEN_USER_ACCESS", "권한이 없는 사용자의 접근입니다.");
+    FORBIDDEN_USER_ACCESS(403, "FORBIDDEN_USER_ACCESS", "권한이 없는 사용자의 접근입니다."),
+    // Board 관련 오류
+    BOARD_NOT_FOUND(404, "BOARD_NOT_FOUND", "해당 게시글을 찾을 수 없습니다."),
+    // BoardLike 관련 오류
+    BOARD_LIKE_DUPLICATED(400, "BOARD_LIKE_DUPLICATED", "좋아요를 이미 눌렀습니다."),
+    BOARD_LIKE_NOT_FOUND(404, "BOARD_LIKE_NOT_FOUND", "좋아요를 찾을 수 없습니다.")
+
+    ;
 
     private final int statusCode;
     private final String systemErrorCode;
