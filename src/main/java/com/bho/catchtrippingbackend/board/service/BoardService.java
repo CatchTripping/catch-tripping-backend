@@ -27,11 +27,11 @@ public class BoardService {
     private final BoardLikeDao boardLikeDao;
 
     @Transactional
-    public void save(CustomUserDetails userDetails, BoardSaveRequestDto requestDto) {
-        log.info("유저 이름 : {}", userDetails.getUsername());
-        User user = getUserById(userDetails.getUserId());
+    public void save(Long userId, BoardSaveRequestDto requestDto) {
+        log.info("유저 이름 : {}", userId);
+        User user = getUserById(userId);
 
-        saveBoard(requestDto, user);
+        saveBoard(user, requestDto);
     }
 
     @Transactional(readOnly = true)
@@ -43,10 +43,10 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardDetailDto update(CustomUserDetails userDetails, Long boardId, BoardUpdateRequestDto requestDto) {
+    public BoardDetailDto update(Long userId, Long boardId, BoardUpdateRequestDto requestDto) {
         Board board = getBoardById(boardId);
 
-        validateBoardAuthor(userDetails, board);
+        validateBoardAuthor(userId, board);
 
         board.update(requestDto.content());
         boardDao.update(board);
@@ -55,18 +55,20 @@ public class BoardService {
     }
 
     @Transactional
-    public void delete(CustomUserDetails userDetails, Long boardId) {
+    public void delete(Long userId, Long boardId) {
         Board board = getBoardById(boardId);
-        validateBoardAuthor(userDetails, board);
+
+        validateBoardAuthor(userId, board);
+
         boardDao.delete(boardId);
     }
 
     @Transactional
-    public void addLike(CustomUserDetails userDetails, BoardLikeRequestDto requestDto) {
-        User user = getUserById(userDetails.getUserId());
+    public void addLike(Long userId, BoardLikeRequestDto requestDto) {
+        User user = getUserById(userId);
         Board board = getBoardById(requestDto.boardId());
 
-        validateBoardLikeDuplication(user, board);
+        validateBoardLikeDuplication(user.getUserId(), board.getId());
 
         BoardLike boardLike = requestDto.from(user, board);
 
@@ -74,33 +76,33 @@ public class BoardService {
     }
 
     @Transactional
-    public void deleteLike(CustomUserDetails userDetails, BoardLikeRequestDto requestDto) {
-        User user = getUserById(userDetails.getUserId());
+    public void deleteLike(Long userId, BoardLikeRequestDto requestDto) {
+        User user = getUserById(userId);
         Board board = getBoardById(requestDto.boardId());
 
-        validateBoardLikeExistence(user, board);
+        validateBoardLikeExistence(user.getUserId(), board.getId());
 
         boardLikeDao.deleteByUserIdAndBoardId(user.getUserId(), board.getId());
     }
 
-    private void validateBoardLikeExistence(User user, Board board) {
-        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(user.getUserId(), board.getId());
+    private void validateBoardLikeExistence(Long userId, Long boardId) {
+        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(userId, boardId);
 
         if (result == 0) {
             throw new RuntimeException("좋아요가 존재하지 않습니다.");
         }
     }
 
-    private void validateBoardLikeDuplication(User user, Board board) {
-        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(user.getUserId(), board.getId());
+    private void validateBoardLikeDuplication(Long userId, Long boardId) {
+        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(userId, boardId);
 
         if (result > 0) {
             throw new RuntimeException("boardLike 중복");
         }
     }
 
-    private void validateBoardAuthor(CustomUserDetails userDetails, Board board) {
-        boolean isAuthorized = userDetails.getUserId() == board.getUser().getUserId();
+    private void validateBoardAuthor(Long userId, Board board) {
+        boolean isAuthorized = userId == board.getUser().getUserId();
         if (!isAuthorized) {
             throw new RuntimeException("권한 없음");
         }
@@ -129,7 +131,7 @@ public class BoardService {
         return user;
     }
 
-    private void saveBoard(BoardSaveRequestDto requestDto, User user) {
+    private void saveBoard(User user, BoardSaveRequestDto requestDto) {
         log.info("Saving board with content : {} for user with ID: {}", requestDto.content(), user.getUserName());
         Board board = requestDto.from(user);
         int result = boardDao.save(board);
