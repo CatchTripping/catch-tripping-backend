@@ -11,5 +11,9 @@ spring:
     openai:
       api-key: ${openai.api-key}
 
+tourapi:
+  serviceKey: Cd%2FxKHLMRAcQyOutSa%2ByMKrvm%2FBL4VykKeYVt6OU9IYV6SKTQ8c4UHm5%2BL%2FFLJfaz3PIdPiyZgwHA1%2BNNnNyrA%3D%3D
+  baseUrl: https://apis.data.go.kr/B551011/KorService1/detailCommon1
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml

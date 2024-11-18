@@ -1,10 +1,14 @@
 package com.bho.catchtrippingbackend.board.service;
 
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
+import com.bho.catchtrippingbackend.board.dao.BoardLikeDao;
 import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
+import com.bho.catchtrippingbackend.board.dto.BoardLikeRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
 import com.bho.catchtrippingbackend.board.entity.Board;
+import com.bho.catchtrippingbackend.board.entity.BoardLike;
+import com.bho.catchtrippingbackend.security.CustomUserDetails;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +24,12 @@ public class BoardService {
 
     private final BoardDao boardDao;
     private final UserDao userDao;
+    private final BoardLikeDao boardLikeDao;
 
     @Transactional
-    public void save(UserDetails userDetails, BoardSaveRequestDto requestDto) {
+    public void save(CustomUserDetails userDetails, BoardSaveRequestDto requestDto) {
         log.info("유저 이름 : {}", userDetails.getUsername());
-        User user = getUserByName(userDetails.getUsername());
+        User user = getUserById(userDetails.getUserId());
 
         saveBoard(requestDto, user);
     }
@@ -38,7 +43,7 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardDetailDto update(UserDetails userDetails, Long boardId, BoardUpdateRequestDto requestDto) {
+    public BoardDetailDto update(CustomUserDetails userDetails, Long boardId, BoardUpdateRequestDto requestDto) {
         Board board = getBoardById(boardId);
 
         validateBoardAuthor(userDetails, board);
@@ -50,15 +55,52 @@ public class BoardService {
     }
 
     @Transactional
-    public void delete(UserDetails userDetails, Long boardId) {
+    public void delete(CustomUserDetails userDetails, Long boardId) {
         Board board = getBoardById(boardId);
         validateBoardAuthor(userDetails, board);
         boardDao.delete(boardId);
     }
 
-    private void validateBoardAuthor(UserDetails userDetails, Board board) {
-        boolean isAuthorized = userDetails.getUsername().equals(board.getUser().getUserName());
+    @Transactional
+    public void addLike(CustomUserDetails userDetails, BoardLikeRequestDto requestDto) {
+        User user = getUserById(userDetails.getUserId());
+        Board board = getBoardById(requestDto.boardId());
 
+        validateBoardLikeDuplication(user, board);
+
+        BoardLike boardLike = requestDto.from(user, board);
+
+        boardLikeDao.save(boardLike);
+    }
+
+    @Transactional
+    public void deleteLike(CustomUserDetails userDetails, BoardLikeRequestDto requestDto) {
+        User user = getUserById(userDetails.getUserId());
+        Board board = getBoardById(requestDto.boardId());
+
+        validateBoardLikeExistence(user, board);
+
+        boardLikeDao.deleteByUserIdAndBoardId(user.getUserId(), board.getId());
+    }
+
+    private void validateBoardLikeExistence(User user, Board board) {
+        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(user.getUserId(), board.getId());
+
+        if (result == 0) {
+            throw new RuntimeException("좋아요가 존재하지 않습니다.");
+        }
+    }
+
+    private void validateBoardLikeDuplication(User user, Board board) {
+        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(user.getUserId(), board.getId());
+
+        if (result > 0) {
+            throw new RuntimeException("boardLike 중복");
+        }
+    }
+
+    private void validateBoardAuthor(CustomUserDetails userDetails, Board board) {
+        boolean isAuthorized = userDetails.getUserId() == board.getUser().getUserId();
         if (!isAuthorized) {
             throw new RuntimeException("권한 없음");
         }
@@ -74,19 +116,18 @@ public class BoardService {
         return board;
     }
 
+    private User getUserById(Long userId) {
 
-    private User getUserByName(String name) {
-        log.info("Fetching user with name: {}", name);
-        User user = userDao.findUserByUsername(name);
+        log.info("Fetching user with userId: {}", userId);
+        User user = userDao.findUserById(userId);
         if (user == null) {
-            log.error("User not found with name: {}", name);
+            log.error("User not found with name: {}", userId);
             // exception 추후 수정
-            throw new RuntimeException("User not found with name: " + name);
+            throw new RuntimeException("User not found with userId: " + userId);
         }
-        log.info("name으로 유저 db에서 조회 후 반환 : {}", user.getUserId());
+        log.info("userId으로 유저 db에서 조회 후 반환 : {}", user.getUserName());
         return user;
     }
-
 
     private void saveBoard(BoardSaveRequestDto requestDto, User user) {
         log.info("Saving board with content : {} for user with ID: {}", requestDto.content(), user.getUserName());

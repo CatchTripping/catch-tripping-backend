@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -21,10 +23,16 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Invalid credential");
         }
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUserName())
-                .password(user.getUserPassword())
-                .roles("USER")
-                .build();
+        return new CustomUserDetails(
+                user.getUserId(),
+                user.getUserName(),
+                user.getUserPassword(),
+                List.of(() -> "ROLE_USER")
+        );
+//                org.springframework.security.core.userdetails.User.builder()
+//                .username(user.getUserName())
+//                .password(user.getUserPassword())
+//                .roles("USER")
+//                .build();
     }
 }

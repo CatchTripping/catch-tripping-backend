@@ -1,0 +1,49 @@
+`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bho.catchtrippingbackend.board.dao.BoardLikeDao">
+
+    <!-- BoardLike Result Map -->
+    <resultMap id="BoardLikeResultMap" type="BoardLike">
+        <id property="id" column="id"/>
+        <result property="createdAt" column="created_at"/>
+
+        <association property="user" javaType="User">
+            <id property="userId" column="user_id"/>
+            <result property="userName" column="user_name"/>
+            <result property="userEmail" column="user_email"/>
+            <result property="userPassword" column="user_password"/>
+            <result property="profileImage" column="profile_image"/>
+            <result property="createdAt" column="user_created_at"/>
+        </association>
+
+        <association property="board" javaType="Board">
+            <id property="id" column="board_id"/>
+            <result property="content" column="board_content"/>
+            <result property="createdAt" column="board_created_at"/>
+            <result property="updatedAt" column="board_updated_at"/>
+        </association>
+    </resultMap>
+
+    <!-- 좋아요 중복 확인 쿼리 -->
+    <select id="findBoardLikeByBoardIdAndUserId" resultType="int" parameterType="map">
+        SELECT COUNT(*)
+        FROM board_like
+        WHERE user_id = #{userId} AND board_id = #{boardId}
+    </select>
+
+    <!-- 좋아요 추가 쿼리 -->
+    <insert id="save" parameterType="BoardLike">
+        INSERT INTO board_like (user_id, board_id, created_at)
+        VALUES (#{user.userId}, #{board.id}, NOW())
+    </insert>
+
+    <!-- 좋아요 삭제 쿼리 -->
+    <delete id="deleteByUserIdAndBoardId" parameterType="map">
+        DELETE FROM board_like
+        WHERE user_id = #{userId} AND board_id = #{boardId}
+    </delete>
+
+</mapper>`
