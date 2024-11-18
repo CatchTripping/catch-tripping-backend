@@ -11,13 +11,10 @@ import com.bho.catchtrippingbackend.board.entity.BoardLike;
 import com.bho.catchtrippingbackend.error.SystemException;
 import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
 import com.bho.catchtrippingbackend.error.code.ServerErrorCode;
-import com.bho.catchtrippingbackend.error.response.CustomResponse;
-import com.bho.catchtrippingbackend.security.CustomUserDetails;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,7 +86,7 @@ public class BoardService {
         boardLikeDao.deleteByUserIdAndBoardId(user.getUserId(), board.getId());
     }
 
-    private void validateBoardLikeExistence(Long userId, Long boardId) {
+    public void validateBoardLikeExistence(Long userId, Long boardId) {
         int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(userId, boardId);
 
         if (result == 0) {

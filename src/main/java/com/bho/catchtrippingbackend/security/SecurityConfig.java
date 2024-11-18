@@ -14,7 +14,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -42,24 +41,25 @@ public class SecurityConfig {
                 .cors((cors) -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/register", "/users/register", "/users/check-email", "/users/check-username", "/login", "/authenticate").anonymous()
                         .requestMatchers("/error", "/", "/users/check").permitAll()
                         .requestMatchers("/users/userinfo").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
-                                .loginProcessingUrl("/authenticate")
-                                .usernameParameter("username")
-                                .passwordParameter("password")
-                                .successHandler((HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
-                                    response.setContentType("application/json");
-                                    response.setCharacterEncoding("UTF-8");
-                                    // 로그인 성공 시 세션 ID와 사용자 정보를 반환
-                                    String sessionId = request.getSession().getId();
-                                    response.getWriter().write("{\"status\":\"success\", \"message\":\"Login successful\", \"sessionId\":\"" + sessionId + "\"}");
-                                })
-                                .failureHandler(customAuthenticationFailureHandler)
-                                .permitAll()
+                        .loginProcessingUrl("/authenticate")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .successHandler((HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            // 로그인 성공 시 세션 ID와 사용자 정보를 반환
+                            String sessionId = request.getSession().getId();
+                            response.getWriter().write("{\"status\":\"success\", \"message\":\"Login successful\", \"sessionId\":\"" + sessionId + "\"}");
+                        })
+                        .failureHandler(customAuthenticationFailureHandler)
+                        .permitAll()
                 )
                 .logout((logout) -> logout
                         .logoutUrl("/logout")
@@ -82,8 +82,8 @@ public class SecurityConfig {
                         .maxSessionsPreventsLogin(false)
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                .authenticationEntryPoint(customAuthenticationEntryPoint)
-                .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 );
 
         return http.build();
