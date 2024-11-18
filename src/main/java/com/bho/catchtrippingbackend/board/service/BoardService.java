@@ -1,10 +1,13 @@
 package com.bho.catchtrippingbackend.board.service;
 
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
+import com.bho.catchtrippingbackend.board.dao.BoardLikeDao;
 import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
+import com.bho.catchtrippingbackend.board.dto.BoardLikeRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
 import com.bho.catchtrippingbackend.board.entity.Board;
+import com.bho.catchtrippingbackend.board.entity.BoardLike;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ public class BoardService {
 
     private final BoardDao boardDao;
     private final UserDao userDao;
+    private final BoardLikeDao boardLikeDao;
 
     @Transactional
     public void save(UserDetails userDetails, BoardSaveRequestDto requestDto) {
@@ -54,6 +58,45 @@ public class BoardService {
         Board board = getBoardById(boardId);
         validateBoardAuthor(userDetails, board);
         boardDao.delete(boardId);
+    }
+
+    @Transactional
+    public void addLike(UserDetails userDetails, BoardLikeRequestDto requestDto) {
+        // userDetail에 id 추가되면 validate 코드 수정
+        User user = getUserByName(userDetails.getUsername());
+        Board board = getBoardById(requestDto.boardId());
+
+        validateBoardLikeDuplication(user, board);
+
+        BoardLike boardLike = requestDto.from(user, board);
+
+        boardLikeDao.save(boardLike);
+    }
+
+    @Transactional
+    public void deleteLike(UserDetails userDetails, BoardLikeRequestDto requestDto) {
+        User user = getUserByName(userDetails.getUsername());
+        Board board = getBoardById(requestDto.boardId());
+
+        validateBoardLikeExistence(user, board);
+
+        boardLikeDao.deleteByUserIdAndBoardId(user.getUserId(), board.getId());
+    }
+
+    private void validateBoardLikeExistence(User user, Board board) {
+        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(user.getUserId(), board.getId());
+
+        if (result == 0) {
+            throw new RuntimeException("좋아요가 존재하지 않습니다.");
+        }
+    }
+
+    private void validateBoardLikeDuplication(User user, Board board) {
+        int result = boardLikeDao.findBoardLikeByBoardIdAndUserId(user.getUserId(), board.getId());
+
+        if (result > 0) {
+            throw new RuntimeException("boardLike 중복");
+        }
     }
 
     private void validateBoardAuthor(UserDetails userDetails, Board board) {

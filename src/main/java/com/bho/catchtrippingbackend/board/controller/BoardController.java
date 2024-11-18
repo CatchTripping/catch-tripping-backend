@@ -1,6 +1,7 @@
 package com.bho.catchtrippingbackend.board.controller;
 
 import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
+import com.bho.catchtrippingbackend.board.dto.BoardLikeRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
 import com.bho.catchtrippingbackend.board.service.BoardService;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +23,8 @@ public class BoardController {
     @PostMapping
     public ResponseEntity<String> save(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody BoardSaveRequestDto requestDTO) {
-        boardService.save(userDetails, requestDTO);
+            @RequestBody BoardSaveRequestDto requestDto) {
+        boardService.save(userDetails, requestDto);
 
         return ResponseEntity.ok("저장 완료");
     }
@@ -39,8 +41,9 @@ public class BoardController {
     public ResponseEntity<BoardDetailDto> updateBoard(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long boardId,
-            @RequestBody BoardUpdateRequestDto requestDTO) {
-        BoardDetailDto boardDetailDto = boardService.update(userDetails, boardId, requestDTO);
+            @RequestBody BoardUpdateRequestDto requestDto) {
+        BoardDetailDto boardDetailDto = boardService.update(userDetails, boardId, requestDto);
+
         return ResponseEntity.ok(boardDetailDto);
     }
 
@@ -49,7 +52,25 @@ public class BoardController {
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long boardId) {
         boardService.delete(userDetails, boardId);
-        // return status 수정
+
         return ResponseEntity.ok("삭제 완료");
+    }
+
+    @PostMapping("/like")
+    public ResponseEntity<String> addLike(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody BoardLikeRequestDto requestDto) {
+        boardService.addLike(userDetails, requestDto);
+
+        return ResponseEntity.ok("좋아요 추가 완료");
+    }
+
+    @DeleteMapping("/like")
+    public ResponseEntity<String> deleteLike(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody BoardLikeRequestDto requestDto) {
+        boardService.deleteLike(userDetails, requestDto);
+
+        return ResponseEntity.ok("좋아요 삭제 완료");
     }
 }
