@@ -29,7 +29,7 @@ public class BoardService {
     @Transactional
     public void save(CustomUserDetails userDetails, BoardSaveRequestDto requestDto) {
         log.info("유저 이름 : {}", userDetails.getUsername());
-        User user = gerUserById(userDetails.getUserId());
+        User user = getUserById(userDetails.getUserId());
 
         saveBoard(requestDto, user);
     }
@@ -62,9 +62,8 @@ public class BoardService {
     }
 
     @Transactional
-    public void addLike(UserDetails userDetails, BoardLikeRequestDto requestDto) {
-        // userDetail에 id 추가되면 validate 코드 수정
-        User user = getUserByName(userDetails.getUsername());
+    public void addLike(CustomUserDetails userDetails, BoardLikeRequestDto requestDto) {
+        User user = getUserById(userDetails.getUserId());
         Board board = getBoardById(requestDto.boardId());
 
         validateBoardLikeDuplication(user, board);
@@ -75,8 +74,8 @@ public class BoardService {
     }
 
     @Transactional
-    public void deleteLike(UserDetails userDetails, BoardLikeRequestDto requestDto) {
-        User user = getUserByName(userDetails.getUsername());
+    public void deleteLike(CustomUserDetails userDetails, BoardLikeRequestDto requestDto) {
+        User user = getUserById(userDetails.getUserId());
         Board board = getBoardById(requestDto.boardId());
 
         validateBoardLikeExistence(user, board);
@@ -117,8 +116,7 @@ public class BoardService {
         return board;
     }
 
-
-    private User gerUserById(int userId) {
+    private User getUserById(int userId) {
         log.info("Fetching user with userId: {}", userId);
         User user = userDao.findUserById(userId);
         if (user == null) {
@@ -127,18 +125,6 @@ public class BoardService {
             throw new RuntimeException("User not found with userId: " + userId);
         }
         log.info("userId으로 유저 db에서 조회 후 반환 : {}", user.getUserName());
-        return user;
-    }
-
-    private User getUserByName(String name) {
-        log.info("Fetching user with name: {}", name);
-        User user = userDao.findUserByUsername(name);
-        if (user == null) {
-            log.error("User not found with name: {}", name);
-            // exception 추후 수정
-            throw new RuntimeException("User not found with name: " + name);
-        }
-        log.info("userId으로 유저 db에서 조회 후 반환 : {}", user.getUserId());
         return user;
     }
 
