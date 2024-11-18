@@ -25,7 +25,7 @@ public class BoardController {
     public ResponseEntity<String> save(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody BoardSaveRequestDto requestDTO) {
-        boardService.save(userDetails, requestDTO);
+        boardService.save(userDetails.getUserId(), requestDTO);
 
         return ResponseEntity.ok("저장 완료");
     }
@@ -43,7 +43,7 @@ public class BoardController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("boardId") Long boardId,
             @RequestBody BoardUpdateRequestDto requestDTO) {
-        BoardDetailDto boardDetailDto = boardService.update(userDetails, boardId, requestDTO);
+        BoardDetailDto boardDetailDto = boardService.update(userDetails.getUserId(), boardId, requestDTO);
         return ResponseEntity.ok(boardDetailDto);
     }
 
@@ -51,7 +51,7 @@ public class BoardController {
     public ResponseEntity<String> deleteBoard(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("boardId") Long boardId) {
-        boardService.delete(userDetails, boardId);
+        boardService.delete(userDetails.getUserId(), boardId);
 
         return ResponseEntity.ok("삭제 완료");
     }
@@ -60,7 +60,7 @@ public class BoardController {
     public ResponseEntity<String> addLike(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody BoardLikeRequestDto requestDto) {
-        boardService.addLike(userDetails, requestDto);
+        boardService.addLike(userDetails.getUserId(), requestDto);
 
         return ResponseEntity.ok("좋아요 추가 완료");
     }
@@ -69,7 +69,7 @@ public class BoardController {
     public ResponseEntity<String> deleteLike(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody BoardLikeRequestDto requestDto) {
-        boardService.deleteLike(userDetails, requestDto);
+        boardService.deleteLike(userDetails.getUserId(), requestDto);
 
         return ResponseEntity.ok("좋아요 삭제 완료");
     }
