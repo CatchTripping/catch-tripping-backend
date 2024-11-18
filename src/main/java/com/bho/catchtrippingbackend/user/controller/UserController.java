@@ -3,6 +3,7 @@ package com.bho.catchtrippingbackend.user.controller;
 import com.bho.catchtrippingbackend.error.SystemException;
 import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
 import com.bho.catchtrippingbackend.error.response.CustomResponse;
+import com.bho.catchtrippingbackend.security.CustomUserDetails;
 import com.bho.catchtrippingbackend.user.dto.*;
 import com.bho.catchtrippingbackend.user.entity.User;
 import com.bho.catchtrippingbackend.user.service.UserService;
@@ -93,17 +94,18 @@ public class UserController {
     @GetMapping("/userinfo")
     public ResponseEntity<CustomResponse<UserDto>> getUserInfo(Authentication authentication) {
 
-        org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-        User userDetails = userService.findUserByUsername(user.getUsername());
+//        org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        User user = userService.findUserByUsername(userDetails.getUsername());
 
-        if (userDetails == null) {
+        if (user == null) {
             // 유효한 사용자 정보가 없다면 404
             throw new SystemException(ClientErrorCode.USER_NOT_FOUND);
         }
 
         UserDto userInfo = UserDto.fromEntity(
-                userDetails,
-                user.getAuthorities()
+                user,
+                userDetails.getAuthorities()
         );
         return ResponseEntity.ok(CustomResponse.success(userInfo));
     }
