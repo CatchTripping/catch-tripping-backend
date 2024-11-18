@@ -8,6 +8,7 @@ import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
 import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.board.entity.BoardLike;
+import com.bho.catchtrippingbackend.security.CustomUserDetails;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,9 @@ public class BoardService {
     private final BoardLikeDao boardLikeDao;
 
     @Transactional
-    public void save(UserDetails userDetails, BoardSaveRequestDto requestDto) {
+    public void save(CustomUserDetails userDetails, BoardSaveRequestDto requestDto) {
         log.info("유저 이름 : {}", userDetails.getUsername());
-        User user = getUserByName(userDetails.getUsername());
+        User user = gerUserById(userDetails.getUserId());
 
         saveBoard(requestDto, user);
     }
@@ -42,7 +43,7 @@ public class BoardService {
     }
 
     @Transactional
-    public BoardDetailDto update(UserDetails userDetails, Long boardId, BoardUpdateRequestDto requestDto) {
+    public BoardDetailDto update(CustomUserDetails userDetails, Long boardId, BoardUpdateRequestDto requestDto) {
         Board board = getBoardById(boardId);
 
         validateBoardAuthor(userDetails, board);
@@ -54,7 +55,7 @@ public class BoardService {
     }
 
     @Transactional
-    public void delete(UserDetails userDetails, Long boardId) {
+    public void delete(CustomUserDetails userDetails, Long boardId) {
         Board board = getBoardById(boardId);
         validateBoardAuthor(userDetails, board);
         boardDao.delete(boardId);
@@ -99,9 +100,8 @@ public class BoardService {
         }
     }
 
-    private void validateBoardAuthor(UserDetails userDetails, Board board) {
-        boolean isAuthorized = userDetails.getUsername().equals(board.getUser().getUserName());
-
+    private void validateBoardAuthor(CustomUserDetails userDetails, Board board) {
+        boolean isAuthorized = userDetails.getUserId() == board.getUser().getUserId();
         if (!isAuthorized) {
             throw new RuntimeException("권한 없음");
         }
@@ -118,6 +118,18 @@ public class BoardService {
     }
 
 
+    private User gerUserById(int userId) {
+        log.info("Fetching user with userId: {}", userId);
+        User user = userDao.findUserById(userId);
+        if (user == null) {
+            log.error("User not found with name: {}", userId);
+            // exception 추후 수정
+            throw new RuntimeException("User not found with userId: " + userId);
+        }
+        log.info("userId으로 유저 db에서 조회 후 반환 : {}", user.getUserName());
+        return user;
+    }
+
     private User getUserByName(String name) {
         log.info("Fetching user with name: {}", name);
         User user = userDao.findUserByUsername(name);
@@ -126,10 +138,9 @@ public class BoardService {
             // exception 추후 수정
             throw new RuntimeException("User not found with name: " + name);
         }
-        log.info("name으로 유저 db에서 조회 후 반환 : {}", user.getUserId());
+        log.info("userId으로 유저 db에서 조회 후 반환 : {}", user.getUserId());
         return user;
     }
-
 
     private void saveBoard(BoardSaveRequestDto requestDto, User user) {
         log.info("Saving board with content : {} for user with ID: {}", requestDto.content(), user.getUserName());

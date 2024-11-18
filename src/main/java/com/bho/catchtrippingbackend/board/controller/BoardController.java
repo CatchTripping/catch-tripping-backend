@@ -5,6 +5,7 @@ import com.bho.catchtrippingbackend.board.dto.BoardLikeRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
 import com.bho.catchtrippingbackend.board.service.BoardService;
+import com.bho.catchtrippingbackend.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +23,16 @@ public class BoardController {
 
     @PostMapping
     public ResponseEntity<String> save(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody BoardSaveRequestDto requestDto) {
-        boardService.save(userDetails, requestDto);
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody BoardSaveRequestDto requestDTO) {
+        boardService.save(userDetails, requestDTO);
 
         return ResponseEntity.ok("저장 완료");
     }
 
     @GetMapping("/{boardId}")
     public ResponseEntity<BoardDetailDto> findBoardById(
-            @PathVariable Long boardId) {
+            @PathVariable("boardId") Long boardId) {
         BoardDetailDto boardDetailDto = boardService.findBoardDetailById(boardId);
 
         return ResponseEntity.ok(boardDetailDto);
@@ -39,18 +40,17 @@ public class BoardController {
 
     @PatchMapping("/{boardId}")
     public ResponseEntity<BoardDetailDto> updateBoard(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable Long boardId,
-            @RequestBody BoardUpdateRequestDto requestDto) {
-        BoardDetailDto boardDetailDto = boardService.update(userDetails, boardId, requestDto);
-
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("boardId") Long boardId,
+            @RequestBody BoardUpdateRequestDto requestDTO) {
+        BoardDetailDto boardDetailDto = boardService.update(userDetails, boardId, requestDTO);
         return ResponseEntity.ok(boardDetailDto);
     }
 
     @DeleteMapping("/{boardId}")
     public ResponseEntity<String> deleteBoard(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable Long boardId) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("boardId") Long boardId) {
         boardService.delete(userDetails, boardId);
 
         return ResponseEntity.ok("삭제 완료");
