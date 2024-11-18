@@ -130,6 +130,17 @@ public class BoardService {
         return user;
     }
 
+    private User getUserByName(String name) {
+        log.info("Fetching user with name: {}", name);
+        User user = userDao.findUserByUsername(name);
+        if (user == null) {
+            log.error("User not found with name: {}", name);
+            // exception 추후 수정
+            throw new RuntimeException("User not found with name: " + name);
+        }
+        log.info("userId으로 유저 db에서 조회 후 반환 : {}", user.getUserId());
+        return user;
+    }
 
     private void saveBoard(BoardSaveRequestDto requestDto, User user) {
         log.info("Saving board with content : {} for user with ID: {}", requestDto.content(), user.getUserName());
