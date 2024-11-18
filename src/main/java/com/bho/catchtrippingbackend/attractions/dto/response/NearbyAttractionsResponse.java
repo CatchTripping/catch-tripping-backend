@@ -23,5 +23,16 @@ public class NearbyAttractionsResponse {
         private String firstImage;  // 콘텐츠의 첫 번째 이미지 URL
         private int contentId;      // 콘텐츠 고유 ID
         private List<CategoryCodes> categoryCodesList; // 콘텐츠 카테고리 코드 List
+
+        // 추가 필드
+        private double mapx;            // 경도
+        private double mapy;            // 위도
+        private int mlevel;
+        private String tel;
+        private String zipcode;
+        private String addr1;
+        private String addr2;
+        private int contenttypeid;
+        private String contentTypeName; // contenttypeid에 해당하는 명칭
     }
 }

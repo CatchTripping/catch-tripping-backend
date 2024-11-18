@@ -60,6 +60,15 @@ class AttractionByDistanceTests {
                 System.out.println("첫 번째 이미지: " + attraction.getFirstImage());
                 System.out.println("콘텐츠 ID: " + attraction.getContentId());
                 System.out.println("카테고리 코드 리스트: " + attraction.getCategoryCodesList());
+                System.out.println("경도(mapx): " + attraction.getMapx());
+                System.out.println("위도(mapy): " + attraction.getMapy());
+                System.out.println("mlevel: " + attraction.getMlevel());
+                System.out.println("전화번호(tel): " + attraction.getTel());
+                System.out.println("우편번호(zipcode): " + attraction.getZipcode());
+                System.out.println("주소(addr1): " + attraction.getAddr1());
+                System.out.println("주소(addr2): " + attraction.getAddr2());
+                System.out.println("콘텐츠 타입 ID(contenttypeid): " + attraction.getContenttypeid());
+                System.out.println("콘텐츠 타입 이름(contentTypeName): " + attraction.getContentTypeName());
                 System.out.println("------------------------------");
             }
 
