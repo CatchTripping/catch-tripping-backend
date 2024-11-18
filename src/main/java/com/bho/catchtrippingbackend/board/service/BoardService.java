@@ -118,7 +118,7 @@ public class BoardService {
     }
 
 
-    private User gerUserById(int userId) {
+    private User gerUserById(Long userId) {
         log.info("Fetching user with userId: {}", userId);
         User user = userDao.findUserById(userId);
         if (user == null) {
