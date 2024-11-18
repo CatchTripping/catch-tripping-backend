@@ -2,7 +2,9 @@ package com.bho.catchtrippingbackend.attractions.service;
 
 import com.bho.catchtrippingbackend.attractions.dto.*;
 import com.bho.catchtrippingbackend.attractions.dto.request.HotPlaceRequest;
+import com.bho.catchtrippingbackend.attractions.dto.request.NearbyAttractionsRequest;
 import com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse;
+import com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -85,4 +87,6 @@ public interface AttractionService {
 
     // 콘텐츠 상세 정보를 가져오는 메서드
     ContentDetails getContentDetails(int contentId) throws Exception;
+
+    NearbyAttractionsResponse getNearbyAttractions(NearbyAttractionsRequest request);
 }

@@ -44,6 +44,35 @@
         <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes" select="getCategoriesByContentId" column="contentid"/>
     </resultMap>
 
+    <!--    &lt;!&ndash; 결과 매핑 &ndash;&gt;-->
+    <!--    <resultMap id="AttractionSummaryMap" type="com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse$AttractionSummary">-->
+    <!--        <id property="contentId" column="contentid"/>-->
+    <!--        <result property="title" column="title"/>-->
+    <!--        <result property="firstImage" column="firstimage"/>-->
+    <!--        <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes"-->
+    <!--                    select="com.bho.catchtrippingbackend.attractions.dao.CategoryCodesDao.getCategoriesByContentId" column="contentid"/>-->
+    <!--    </resultMap>-->
+
+    <!-- ResultMap 수정 -->
+    <resultMap id="AttractionSummaryMap" type="com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse$AttractionSummary">
+        <id property="contentId" column="contentid"/>
+        <result property="title" column="title"/>
+        <result property="firstImage" column="firstimage"/>
+        <result property="mapx" column="mapx"/>
+        <result property="mapy" column="mapy"/>
+        <result property="mlevel" column="mlevel"/>
+        <result property="tel" column="tel"/>
+        <result property="zipcode" column="zipcode"/>
+        <result property="addr1" column="addr1"/>
+        <result property="addr2" column="addr2"/>
+        <result property="contenttypeid" column="contenttypeid"/>
+        <result property="contentTypeName" column="content_type_name"/>
+
+        <collection property="categoryCodesList" ofType="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes"
+                    select="com.bho.catchtrippingbackend.attractions.dao.CategoryCodesDao.getCategoriesByContentId" column="contentid"/>
+    </resultMap>
+
+
     <!-- ID로 데이터 조회 -->
     <select id="findById" parameterType="int" resultMap="AreaBasedContentsMap">
         SELECT * FROM area_based_contents WHERE contentid = #{contentId}
@@ -259,17 +288,68 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <!-- Nested select to get categories by content ID -->
-    <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">
-        SELECT cc.category_code, cc.category_name
-        FROM category_codes cc
-        WHERE cc.category_code IN (
-            SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}
-            UNION
-            SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}
-            UNION
-            SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}
-        )
+        <!-- Nested select to get categories by content ID -->
+        <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">
+            SELECT cc.category_code, cc.category_name
+            FROM category_codes cc
+            WHERE cc.category_code IN (
+                SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}
+                UNION
+                SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}
+                UNION
+                SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}
+            )
+        </select>
+
+    <!--    &lt;!&ndash; findNearbyAttractions 쿼리 &ndash;&gt;-->
+    <!--    <select id="findNearbyAttractions" parameterType="map" resultMap="AttractionSummaryMap">-->
+    <!--        SELECT-->
+    <!--        abc.contentid,-->
+    <!--        abc.title,-->
+    <!--        abc.firstimage-->
+    <!--        FROM area_based_contents abc-->
+    <!--        WHERE-->
+    <!--        ST_Distance_Sphere(-->
+    <!--        POINT(abc.mapx, abc.mapy),-->
+    <!--        POINT(#{longitude}, #{latitude})-->
+    <!--        ) &lt; #{distance} * 1000-->
+    <!--        LIMIT #{limit} OFFSET #{offset}-->
+    <!--    </select>-->
+
+    <!-- findNearbyAttractions 쿼리 수정 -->
+    <select id="findNearbyAttractions" parameterType="map" resultMap="AttractionSummaryMap">
+        SELECT
+            abc.contentid,
+            abc.title,
+            abc.firstimage,
+            abc.mapx,
+            abc.mapy,
+            abc.mlevel,
+            abc.tel,
+            abc.zipcode,
+            abc.addr1,
+            abc.addr2,
+            abc.contenttypeid,
+            ct.content_type_name
+        FROM area_based_contents abc
+                 LEFT JOIN content_types ct ON abc.contenttypeid = ct.content_type_id
+        WHERE
+            ST_Distance_Sphere(
+                    POINT(abc.mapx, abc.mapy),
+                    POINT(#{longitude}, #{latitude})
+            ) &lt; #{distance} * 1000
+            LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- countNearbyAttractions 쿼리 -->
+    <select id="countNearbyAttractions" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM area_based_contents abc
+        WHERE
+            ST_Distance_Sphere(
+                    POINT(abc.mapx, abc.mapy),
+                    POINT(#{longitude}, #{latitude})
+            ) &lt; #{distance} * 1000
     </select>
 
 </mapper>
