@@ -1,6 +1,7 @@
 package com.bho.catchtrippingbackend.board.controller;
 
 import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
+import com.bho.catchtrippingbackend.board.dto.BoardLikeRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
 import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
 import com.bho.catchtrippingbackend.board.service.BoardService;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,7 +52,25 @@ public class BoardController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("boardId") Long boardId) {
         boardService.delete(userDetails, boardId);
-        // return status 수정
+
         return ResponseEntity.ok("삭제 완료");
+    }
+
+    @PostMapping("/like")
+    public ResponseEntity<String> addLike(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody BoardLikeRequestDto requestDto) {
+        boardService.addLike(userDetails, requestDto);
+
+        return ResponseEntity.ok("좋아요 추가 완료");
+    }
+
+    @DeleteMapping("/like")
+    public ResponseEntity<String> deleteLike(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody BoardLikeRequestDto requestDto) {
+        boardService.deleteLike(userDetails, requestDto);
+
+        return ResponseEntity.ok("좋아요 삭제 완료");
     }
 }
