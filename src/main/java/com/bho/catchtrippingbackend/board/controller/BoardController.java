@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/board")
@@ -72,5 +74,13 @@ public class BoardController {
         boardService.deleteLike(userDetails.getUserId(), requestDto);
 
         return ResponseEntity.ok("좋아요 삭제 완료");
+    }
+
+    @GetMapping
+    public ResponseEntity<List<BoardDetailDto>> getPagedBoards(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
+        List<BoardDetailDto> boards = boardService.findAllBoardsWithPaging(page, size);
+        return ResponseEntity.ok(boards);
     }
 }
