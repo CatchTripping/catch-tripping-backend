@@ -3,18 +3,14 @@ package com.bho.catchtrippingbackend.security;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,7 +21,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
     private final CustomUserDetailsService customUserDetailsService;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
@@ -48,18 +43,18 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
-                                .loginProcessingUrl("/authenticate")
-                                .usernameParameter("username")
-                                .passwordParameter("password")
-                                .successHandler((HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
-                                    response.setContentType("application/json");
-                                    response.setCharacterEncoding("UTF-8");
-                                    // 로그인 성공 시 세션 ID와 사용자 정보를 반환
-                                    String sessionId = request.getSession().getId();
-                                    response.getWriter().write("{\"status\":\"success\", \"message\":\"Login successful\", \"sessionId\":\"" + sessionId + "\"}");
-                                })
-                                .failureHandler(customAuthenticationFailureHandler)
-                                .permitAll()
+                        .loginProcessingUrl("/authenticate")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .successHandler((HttpServletRequest request, HttpServletResponse response, Authentication authentication) -> {
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            // 로그인 성공 시 세션 ID와 사용자 정보를 반환
+                            String sessionId = request.getSession().getId();
+                            response.getWriter().write("{\"status\":\"success\", \"message\":\"Login successful\", \"sessionId\":\"" + sessionId + "\"}");
+                        })
+                        .failureHandler(customAuthenticationFailureHandler)
+                        .permitAll()
                 )
                 .logout((logout) -> logout
                         .logoutUrl("/logout")
@@ -82,8 +77,8 @@ public class SecurityConfig {
                         .maxSessionsPreventsLogin(false)
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                .authenticationEntryPoint(customAuthenticationEntryPoint)
-                .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 );
 
         return http.build();
@@ -94,11 +89,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(customUserDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
+
 }
