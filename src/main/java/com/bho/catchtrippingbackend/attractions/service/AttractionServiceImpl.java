@@ -35,7 +35,7 @@ public class AttractionServiceImpl implements AttractionService {
     @Value("${tourapi.serviceKey}")
     private String serviceKey;
 
-    @Value("${tourapi.baseUrl}")
+    @Value("${tourapi.attraction.baseUrl}")
     private String baseUrl;
 
     @Autowired
