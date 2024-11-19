@@ -2,10 +2,7 @@ package com.bho.catchtrippingbackend.board.service;
 
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
 import com.bho.catchtrippingbackend.board.dao.BoardLikeDao;
-import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
-import com.bho.catchtrippingbackend.board.dto.BoardLikeRequestDto;
-import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
-import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
+import com.bho.catchtrippingbackend.board.dto.*;
 import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.board.entity.BoardLike;
 import com.bho.catchtrippingbackend.error.SystemException;
@@ -18,7 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -66,6 +64,15 @@ public class BoardService {
         boardDao.delete(boardId);
     }
 
+    @Transactional(readOnly = true)
+    public List<BoardPreviewDto> findBoardsWithPaging(int page, int size) {
+        int offset = (page - 1) * size;
+        List<Board> boards = boardDao.findBoardsWithPaging(offset, size);
+        return boards.stream()
+                .map(BoardPreviewDto::from)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public void addLike(Long userId, BoardLikeRequestDto requestDto) {
         User user = getUserById(userId);
@@ -105,7 +112,7 @@ public class BoardService {
     }
 
     private void validateBoardAuthor(Long userId, Board board) {
-        boolean isAuthorized = Objects.equals(userId, board.getUser().getUserId());
+        boolean isAuthorized = userId == board.getUser().getUserId();
         if (!isAuthorized) {
             throw new SystemException(ClientErrorCode.FORBIDDEN_USER_ACCESS);
         }
