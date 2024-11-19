@@ -1,9 +1,6 @@
 package com.bho.catchtrippingbackend.board.controller;
 
-import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
-import com.bho.catchtrippingbackend.board.dto.BoardLikeRequestDto;
-import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
-import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
+import com.bho.catchtrippingbackend.board.dto.*;
 import com.bho.catchtrippingbackend.board.service.BoardService;
 import com.bho.catchtrippingbackend.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -77,10 +74,10 @@ public class BoardController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BoardDetailDto>> getPagedBoards(
+    public ResponseEntity<List<BoardPreviewDto>> findBoardsWithPaging(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
-        List<BoardDetailDto> boards = boardService.findAllBoardsWithPaging(page, size);
+        List<BoardPreviewDto> boards = boardService.findBoardsWithPaging(page, size);
         return ResponseEntity.ok(boards);
     }
 }

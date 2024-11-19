@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
@@ -16,6 +18,7 @@ public class Board {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private long likeCount;
 
     @Builder
     public Board(Long id, User user, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
@@ -26,9 +29,16 @@ public class Board {
         this.updatedAt = updatedAt;
     }
 
-
     public void update(String content) {
         this.content = content;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void incrementLikeCount() {
+        this.likeCount += 1;
+    }
+
+    public void decrementLikeCount() {
+        this.likeCount -= 1;
     }
 }

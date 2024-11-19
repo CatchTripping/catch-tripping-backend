@@ -12,5 +12,5 @@ public interface BoardDao {
     int update(Board board);
     int delete(Long boardId);
     Board findBoardById(@Param("boardId") Long boardId);
-    List<Board> findAllBoardsWithPaging(@Param("offset") int offset, @Param("size") int size);
+    List<Board> findBoardsWithPaging(@Param("offset") int offset, @Param("size") int size);
 }

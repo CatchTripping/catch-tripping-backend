@@ -2,10 +2,7 @@
 
     import com.bho.catchtrippingbackend.board.dao.BoardDao;
     import com.bho.catchtrippingbackend.board.dao.BoardLikeDao;
-    import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
-    import com.bho.catchtrippingbackend.board.dto.BoardLikeRequestDto;
-    import com.bho.catchtrippingbackend.board.dto.BoardSaveRequestDto;
-    import com.bho.catchtrippingbackend.board.dto.BoardUpdateRequestDto;
+    import com.bho.catchtrippingbackend.board.dto.*;
     import com.bho.catchtrippingbackend.board.entity.Board;
     import com.bho.catchtrippingbackend.board.entity.BoardLike;
     import com.bho.catchtrippingbackend.error.SystemException;
@@ -19,6 +16,7 @@
     import org.springframework.transaction.annotation.Transactional;
 
     import java.util.List;
+    import java.util.stream.Collectors;
 
     @Slf4j
     @RequiredArgsConstructor
@@ -67,12 +65,12 @@
         }
 
         @Transactional(readOnly = true)
-        public List<BoardDetailDto> findAllBoardsWithPaging(int page, int size) {
+        public List<BoardPreviewDto> findBoardsWithPaging(int page, int size) {
             int offset = (page - 1) * size;
-            List<Board> boards = boardDao.findAllBoardsWithPaging(offset, size);
+            List<Board> boards = boardDao.findBoardsWithPaging(offset, size);
             return boards.stream()
-                    .map(BoardDetailDto::from)
-                    .toList();
+                    .map(BoardPreviewDto::from)
+                    .collect(Collectors.toList());
         }
 
         @Transactional
