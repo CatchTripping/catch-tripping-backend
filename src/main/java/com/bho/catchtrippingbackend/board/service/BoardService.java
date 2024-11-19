@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -103,7 +105,7 @@ public class BoardService {
     }
 
     private void validateBoardAuthor(Long userId, Board board) {
-        boolean isAuthorized = userId == board.getUser().getUserId();
+        boolean isAuthorized = Objects.equals(userId, board.getUser().getUserId());
         if (!isAuthorized) {
             throw new SystemException(ClientErrorCode.FORBIDDEN_USER_ACCESS);
         }
