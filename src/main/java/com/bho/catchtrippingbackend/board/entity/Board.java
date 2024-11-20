@@ -19,14 +19,16 @@ public class Board {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private long likeCount;
+    private List<String> imageUrls = new ArrayList<>();
 
     @Builder
-    public Board(Long id, User user, String content, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Board(Long id, User user, String content, LocalDateTime createdAt, LocalDateTime updatedAt, List<String> imageUrls) {
         this.id = id;
         this.user = user;
         this.content = content;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        if (imageUrls != null) this.imageUrls = imageUrls;
     }
 
     public void update(String content) {

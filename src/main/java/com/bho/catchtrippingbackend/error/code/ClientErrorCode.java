@@ -21,7 +21,10 @@ public enum ClientErrorCode implements ErrorCodeModel{
     BOARD_NOT_FOUND(404, "BOARD_NOT_FOUND", "해당 게시글을 찾을 수 없습니다."),
     // BoardLike 관련 오류
     BOARD_LIKE_DUPLICATED(400, "BOARD_LIKE_DUPLICATED", "좋아요를 이미 눌렀습니다."),
-    BOARD_LIKE_NOT_FOUND(404, "BOARD_LIKE_NOT_FOUND", "좋아요를 찾을 수 없습니다.")
+    BOARD_LIKE_NOT_FOUND(404, "BOARD_LIKE_NOT_FOUND", "좋아요를 찾을 수 없습니다."),
+    // BoardImage 관련 오류
+    INVALID_IMAGE_COUNT(400, "INVALID_IMAGE_COUNT", "게시글에는 적어도 한 장의 이미지를 포함해야 합니다."),
+    IMAGE_URL_INVALID(400, "IMAGE_URL_INVALID", "유효하지 않은 이미지 URL입니다."),
 
     ;
 

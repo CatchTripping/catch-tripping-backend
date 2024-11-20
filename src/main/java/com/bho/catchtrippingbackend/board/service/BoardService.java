@@ -1,6 +1,8 @@
 package com.bho.catchtrippingbackend.board.service;
 
+import com.amazonaws.services.s3.AmazonS3;
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
+import com.bho.catchtrippingbackend.board.dao.BoardImageDao;
 import com.bho.catchtrippingbackend.board.dao.BoardLikeDao;
 import com.bho.catchtrippingbackend.board.dto.*;
 import com.bho.catchtrippingbackend.board.entity.Board;
@@ -12,6 +14,7 @@ import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,13 +29,36 @@ public class BoardService {
     private final BoardDao boardDao;
     private final UserDao userDao;
     private final BoardLikeDao boardLikeDao;
+    private final BoardImageDao boardImageDao;
+
+    private final AmazonS3 amazonS3Client;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucketName;
 
     @Transactional
-    public void save(Long userId, BoardSaveRequestDto requestDto) {
-        log.info("유저 이름 : {}", userId);
-        User user = getUserById(userId);
+    public BoardDetailDto save(Long userId, BoardSaveRequestDto requestDto) {
+        if (requestDto.imageKeys().isEmpty()) {
+            throw new SystemException(ClientErrorCode.INVALID_IMAGE_COUNT);
+        }
 
-        saveBoard(user, requestDto);
+        User user = getUserById(userId);
+        Board board = Board.builder()
+                .user(user)
+                .content(requestDto.content())
+                .build();
+        boardDao.save(board);
+
+        // 이미지 키 저장
+        requestDto.imageKeys().forEach(key -> boardImageDao.save(board.getId(), key));
+
+        log.info("게시글 저장 완료: Board ID = {}", board.getId());
+        return BoardDetailDto.from(board);
+
+//        log.info("유저 이름 : {}", userId);
+//        User user = getUserById(userId);
+//
+//        saveBoard(user, requestDto);
     }
 
     @Transactional(readOnly = true)
@@ -61,7 +87,12 @@ public class BoardService {
 
         validateBoardAuthor(userId, board);
 
+        // 이미지 삭제
+        List<String> imageKeys = boardImageDao.findKeysByBoardId(boardId);
+        imageKeys.forEach(this::deleteImageFromS3);
+
         boardDao.delete(boardId);
+        log.info("게시글 삭제 완료: Board ID = {}", boardId);
     }
 
     @Transactional(readOnly = true)
@@ -71,6 +102,15 @@ public class BoardService {
         return boards.stream()
                 .map(BoardPreviewDto::from)
                 .collect(Collectors.toList());
+    }
+
+    private void deleteImageFromS3(String key) {
+        try {
+            amazonS3Client.deleteObject(bucketName, key);
+        } catch (Exception e) {
+            log.error("Failed to delete image from S3: {}", key, e);
+            throw new SystemException(ServerErrorCode.IMAGE_DELETE_FAILED);
+        }
     }
 
     @Transactional
