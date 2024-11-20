@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bho.catchtrippingbackend.comment.dao.CommentDao">
+
+    <!-- User ResultMap -->
+    <resultMap id="UserMap" type="com.bho.catchtrippingbackend.user.entity.User">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="profileImage" column="profile_image"/>
+        <result property="createdAt" column="user_created_at"/>
+    </resultMap>
+
+    <!-- Board ResultMap -->
+    <resultMap id="BoardMap" type="com.bho.catchtrippingbackend.board.entity.Board">
+        <id property="id" column="board_id"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="likeCount" column="like_count"/>
+        <association property="user" resultMap="UserMap"/>
+    </resultMap>
+
+    <!-- Comment ResultMap -->
+    <resultMap id="CommentMap" type="com.bho.catchtrippingbackend.comment.entity.Comment">
+        <id property="id" column="id"/>
+        <result property="content" column="content"/>
+        <result property="deleted" column="is_deleted"/>
+        <result property="depth" column="depth"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <association property="user" resultMap="UserMap"/>
+        <association property="board" resultMap="BoardMap"/>
+        <association property="parentComment" column="parent_comment_id"
+                     select="findById"/>
+        <collection property="childComments" column="id"
+                    select="findChildComments"/>
+    </resultMap>
+
+    <!-- Save Comment -->
+    <insert id="save" parameterType="Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comment (
+            user_id,
+            board_id,
+            comment_content,
+            parent_comment_id,
+            depth,
+            created_at,
+            updated_at
+        ) VALUES (
+                     #{user.userId},
+                     #{board.id},
+                     #{content},
+                     #{parentComment.id},
+                     #{depth},
+                     NOW(),
+                     NOW()
+                 )
+    </insert>
+
+    <!-- Find Comment By Id -->
+    <select id="findById" parameterType="Long" resultMap="CommentMap">
+        SELECT
+            c.comment_id,
+            c.comment_content,
+            c.is_deleted,
+            c.depth,
+            c.parent_comment_id,
+            c.created_at as comment_created_at,
+            c.updated_at as comment_updated_at,
+            u.user_id,
+            u.user_name,
+            u.user_email,
+            u.profile_image,
+            u.created_at as user_created_at,
+            b.id as board_id,
+            b.content as board_content,
+            b.created_at as board_created_at,
+            b.updated_at as board_updated_at,
+            b.like_count
+        FROM
+            comments c
+                LEFT JOIN users u ON c.user_id = u.user_id
+                LEFT JOIN boards b ON c.board_id = b.id
+        WHERE
+            c.comment_id = #{commentId}
+    </select>
+
+    <!-- Find Child Comments -->
+    <select id="findChildComments" parameterType="Long" resultMap="CommentMap">
+        SELECT
+            c.comment_id,
+            c.comment_content,
+            c.is_deleted,
+            c.depth,
+            c.parent_comment_id,
+            c.created_at as comment_created_at,
+            c.updated_at as comment_updated_at,
+            u.user_id,
+            u.user_name,
+            u.user_email,
+            u.profile_image,
+            u.created_at as user_created_at,
+            b.id as board_id,
+            b.content as board_content,
+            b.created_at as board_created_at,
+            b.updated_at as board_updated_at,
+            b.like_count
+        FROM
+            comments c
+                LEFT JOIN users u ON c.user_id = u.user_id
+                LEFT JOIN boards b ON c.board_id = b.id
+        WHERE
+            c.parent_comment_id = #{commentId}
+        ORDER BY
+            c.created_at ASC
+    </select>
+
+</mapper>
