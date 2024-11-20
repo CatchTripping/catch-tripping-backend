@@ -4,6 +4,7 @@ import com.bho.catchtrippingbackend.travelrecommend.dto.reponse.TravelRecommenda
 import com.bho.catchtrippingbackend.travelrecommend.dto.request.TravelRecommendationRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
+@Slf4j
 @Service
 public class ChatGptService {
     @Value("${openai.chatgpt.api-key}")
@@ -45,9 +47,8 @@ public class ChatGptService {
         String responseStr = responseEntity.getBody();
 
         // 응답에서 여행지 추출
-        TravelRecommendationResponse response = parseResponse(responseStr);
 
-        return response;
+        return parseResponse(responseStr);
     }
 
     private String createPrompt(TravelRecommendationRequest request) {
@@ -65,11 +66,11 @@ public class ChatGptService {
         JsonNode rootNode = objectMapper.readTree(responseStr);
         JsonNode choicesNode = rootNode.path("choices");
 
-        if (choicesNode.isArray() && choicesNode.size() > 0) {
+        if (choicesNode.isArray() && !choicesNode.isEmpty()) {
             String content = choicesNode.get(0).path("message").path("content").asText();
 
             // 응답 내용 출력
-            System.out.println("ChatGPT 응답 내용:\n" + content);
+            log.info("ChatGPT 응답 내용: {}\n", content);
 
             // 응답에서 여행지 리스트 추출
             List<TravelRecommendationResponse.Destination> destinations = extractDestinations(content);

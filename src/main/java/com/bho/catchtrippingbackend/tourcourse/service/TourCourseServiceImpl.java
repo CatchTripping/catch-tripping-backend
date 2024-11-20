@@ -15,6 +15,7 @@ import com.bho.catchtrippingbackend.tourcourse.dto.response.CourseDetailsRespons
 import com.bho.catchtrippingbackend.tourcourse.dto.response.TourCourseSummaryResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class TourCourseServiceImpl implements TourCourseService {
     private final CourseDetailDao courseDetailDao;
@@ -146,15 +148,10 @@ public class TourCourseServiceImpl implements TourCourseService {
                 } else {
                     // API를 통해 좌표 정보 가져오기
                     AreaBasedContents newAreaContent = fetchAreaBasedContentFromAPI(subContentId);
-                    if (newAreaContent != null) {
-                        // 데이터베이스에 삽입
-                        areaBasedContentsDao.insertAreaBasedContent(newAreaContent);
-                        detail.setMapx(newAreaContent.getMapx());
-                        detail.setMapy(newAreaContent.getMapy());
-                    } else {
-                        detail.setMapx(null);
-                        detail.setMapy(null);
-                    }
+                    // 데이터베이스에 삽입
+                    areaBasedContentsDao.insertAreaBasedContent(newAreaContent);
+                    detail.setMapx(newAreaContent.getMapx());
+                    detail.setMapy(newAreaContent.getMapy());
                 }
             }
         }
@@ -302,12 +299,12 @@ public class TourCourseServiceImpl implements TourCourseService {
                 .toUri();
 
         // API 요청 URL 로깅
-        System.out.println("API 요청 URL: " + url);
+        log.info("API 요청 URL: {}", url);
 
         String responseStr = restTemplate.getForObject(url, String.class);
 
         // API 응답 로깅
-        System.out.println("API 응답: " + responseStr);
+        log.info("API 응답: {}", responseStr);
 
         ObjectMapper objectMapper = new ObjectMapper();
 

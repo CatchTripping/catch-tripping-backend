@@ -6,9 +6,9 @@ import com.bho.catchtrippingbackend.attractions.dto.request.HotPlaceRequest;
 import com.bho.catchtrippingbackend.attractions.dto.request.NearbyAttractionsRequest;
 import com.bho.catchtrippingbackend.attractions.dto.response.HotPlaceResponse;
 import com.bho.catchtrippingbackend.attractions.dto.response.NearbyAttractionsResponse;
-import com.bho.catchtrippingbackend.attractions.service.AttractionService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +17,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 public class AttractionServiceImpl implements AttractionService {
 
@@ -49,7 +49,7 @@ public class AttractionServiceImpl implements AttractionService {
         this.sigunguCodesDao = sigunguCodesDao;
         this.categoryCodesDao = categoryCodesDao;
         this.contentTypesDao = contentTypesDao;
-        this.contentDetailsDao=contentDetailsDao;
+        this.contentDetailsDao = contentDetailsDao;
     }
 
     // AreaBasedContents 관련 메서드 구현
@@ -243,7 +243,6 @@ public class AttractionServiceImpl implements AttractionService {
         ContentDetails contentDetails = contentDetailsDao.findByContentId(contentId);
 
         if (contentDetails != null) {
-            System.out.println("DB에 존재");
             return contentDetails;
         } else {
             // OpenAPI에서 가져오기
@@ -280,7 +279,7 @@ public class AttractionServiceImpl implements AttractionService {
                 .toUri();
 
         // URL 출력하여 확인
-        System.out.println("요청 URL: " + url);
+        log.info("요청 URL: {}", url);
 
         // API 호출
         ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
@@ -290,13 +289,12 @@ public class AttractionServiceImpl implements AttractionService {
             String responseBody = response.getBody();
 
             // API 응답 출력하여 확인
-            System.out.println("API 응답: " + responseBody);
+            log.info("API 응답: {}", responseBody);
 
             // JSON 파싱하여 필요한 필드 추출
             ContentDetails contentDetails = parseContentDetailsFromJson(responseBody, contentId);
 
-            System.out.println("출력");
-            System.out.println(contentDetails);
+            log.info("출력: {}", contentDetails);
             return contentDetails;
         } else {
             throw new Exception("API 호출 실패: 상태 코드 " + response.getStatusCode());
@@ -307,7 +305,7 @@ public class AttractionServiceImpl implements AttractionService {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // 응답 전체를 출력하여 확인
-        System.out.println("API 응답: " + json);
+        log.info("API 응답: {}", json);
 
         JsonNode rootNode = objectMapper.readTree(json);
         JsonNode responseNode = rootNode.path("response");
