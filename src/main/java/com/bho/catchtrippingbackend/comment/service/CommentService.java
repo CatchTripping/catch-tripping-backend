@@ -24,15 +24,17 @@ public class CommentService {
     private final BoardDao boardDao;
 
 
-    public CommentResponseDto save(Long userId, CommentSaveRequestDto requestDto) {
+    public void save(Long userId, CommentSaveRequestDto requestDto) {
         User user = getUserById(userId);
         Board board = getBoardById(requestDto.boardId());
+        log.info(requestDto.toString());
 
         Comment parentComment = getParentCommentById(requestDto.parentCommentId());
 
         Comment comment = saveComment(user, board, parentComment, requestDto);
+//        log.info(CommentResponseDto.fromComment(comment).toString());
 
-        return CommentResponseDto.from(comment);
+//        return CommentResponseDto.from(comment);
     }
 
     private Comment getParentCommentById(Long parentCommentId) {

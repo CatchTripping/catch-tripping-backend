@@ -20,11 +20,12 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<CommentResponseDto> save(
+    public ResponseEntity<String> save(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody CommentSaveRequestDto requestDto) {
-        CommentResponseDto responseDto = commentService.save(userDetails.getUserId(), requestDto);
+//        CommentResponseDto responseDto = commentService.save(userDetails.getUserId(), requestDto);
+        commentService.save(userDetails.getUserId(), requestDto);
 
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok("댓글 저장 성공");
     }
 }

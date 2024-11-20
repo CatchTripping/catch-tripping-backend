@@ -13,6 +13,7 @@ public record CommentSaveRequestDto(
         return Comment.builder()
                 .user(user)
                 .board(board)
+                .content(content)
                 .parentComment(parentComment)
                 .depth(depth)
                 .build();

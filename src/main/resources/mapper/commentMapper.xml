@@ -44,32 +44,28 @@
         INSERT INTO comment (
             user_id,
             board_id,
-            comment_content,
+            content,
             parent_comment_id,
-            depth,
-            created_at,
-            updated_at
+            depth
         ) VALUES (
-                     #{user.userId},
-                     #{board.id},
-                     #{content},
-                     #{parentComment.id},
-                     #{depth},
-                     NOW(),
-                     NOW()
+                 #{user.userId},
+                 #{board.id},
+                 #{content},
+                 #{parentComment.id},
+                 #{depth}
                  )
     </insert>
 
     <!-- Find Comment By Id -->
     <select id="findById" parameterType="Long" resultMap="CommentMap">
         SELECT
-            c.comment_id,
-            c.comment_content,
+            c.id,
+            c.content,
             c.is_deleted,
             c.depth,
             c.parent_comment_id,
-            c.created_at as comment_created_at,
-            c.updated_at as comment_updated_at,
+            c.created_at as created_at,
+            c.updated_at as updated_at,
             u.user_id,
             u.user_name,
             u.user_email,
@@ -85,14 +81,14 @@
                 LEFT JOIN users u ON c.user_id = u.user_id
                 LEFT JOIN boards b ON c.board_id = b.id
         WHERE
-            c.comment_id = #{commentId}
+            c.id = #{id}
     </select>
 
     <!-- Find Child Comments -->
     <select id="findChildComments" parameterType="Long" resultMap="CommentMap">
         SELECT
-            c.comment_id,
-            c.comment_content,
+            c.id,
+            c.content,
             c.is_deleted,
             c.depth,
             c.parent_comment_id,
@@ -113,7 +109,7 @@
                 LEFT JOIN users u ON c.user_id = u.user_id
                 LEFT JOIN boards b ON c.board_id = b.id
         WHERE
-            c.parent_comment_id = #{commentId}
+            c.parent_comment_id = #{id}
         ORDER BY
             c.created_at ASC
     </select>
