@@ -11,6 +11,7 @@ import com.bho.catchtrippingbackend.attractions.dto.SigunguCodes;
 import com.bho.catchtrippingbackend.tourcourse.dao.CourseDetailDao;
 import com.bho.catchtrippingbackend.tourcourse.dto.CourseDetail;
 import com.bho.catchtrippingbackend.tourcourse.dto.request.TourCourseListRequest;
+import com.bho.catchtrippingbackend.tourcourse.dto.response.CourseDetailsResponse;
 import com.bho.catchtrippingbackend.tourcourse.dto.response.TourCourseSummaryResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,9 @@ public class TourCourseServiceImpl implements TourCourseService {
     @Value("${tourapi.tourcourse.detailInfoUrl}")
     private String detailInfoUrl;
 
+    @Value("${tourapi.tourcourse.detailCommonUrl}")
+    private String detailCommonUrl;
+
     public TourCourseServiceImpl(CourseDetailDao courseDetailDao,
                                  ContentDetailsDao contentDetailsDao,
                                  AreaCodesDao areaCodesDao,
@@ -50,25 +55,30 @@ public class TourCourseServiceImpl implements TourCourseService {
     }
 
     @Override
-    public List<CourseDetail> getCourseDetails(int contentId) throws Exception {
-        // 데이터베이스에서 조회
-        List<CourseDetail> courseDetails = courseDetailDao.findByContentId(contentId);
-        if (courseDetails != null && !courseDetails.isEmpty()) {
-            return courseDetails;
-        } else {
-            // API 호출하여 데이터 가져오기
-            courseDetails = fetchCourseDetailsFromAPI(contentId);
-
-            if (courseDetails != null && !courseDetails.isEmpty()) {
-                // 데이터베이스에 저장하기 전에 기존 데이터를 삭제
-                courseDetailDao.deleteByContentId(contentId);
-                // 데이터베이스에 저장
-                courseDetailDao.insertCourseDetails(courseDetails);
-                return courseDetails;
+    public CourseDetailsResponse getCourseDetails(int contentId) throws Exception {
+        // 데이터베이스에서 코스 정보 조회
+        AreaBasedContents course = areaBasedContentsDao.findById(contentId);
+        if (course == null || course.getOverview() == null) {
+            // API를 통해 코스 정보 가져오기
+            AreaBasedContents courseFromApi = fetchCourseOverviewFromAPI(contentId);
+            if (course == null) {
+                // 새로운 코스 정보 삽입
+                areaBasedContentsDao.insertAreaBasedContent(courseFromApi);
             } else {
-                throw new Exception("API에서 코스 상세 정보를 가져오지 못했습니다.");
+                // 기존 코스 정보 업데이트
+                areaBasedContentsDao.updateAreaBasedContent(courseFromApi);
             }
+            course = courseFromApi;
         }
+
+        // 코스 상세 정보 가져오기
+        List<CourseDetail> courseDetails = getCourseDetailsList(contentId);
+
+        CourseDetailsResponse response = new CourseDetailsResponse();
+        response.setOverview(course.getOverview());
+        response.setCourseDetails(courseDetails);
+
+        return response;
     }
 
     private List<CourseDetail> fetchCourseDetailsFromAPI(int contentId) throws Exception {
@@ -124,6 +134,30 @@ public class TourCourseServiceImpl implements TourCourseService {
 
         // 추가로 content_details에 infoname과 infotext 저장 (필요한 경우)
         saveContentDetails(contentId, itemsNode);
+
+        for (CourseDetail detail : courseDetails) {
+            int subContentId = detail.getSubContentId();
+            if (subContentId > 0) {
+                // areaBasedContents에서 좌표 정보 가져오기
+                AreaBasedContents areaContent = areaBasedContentsDao.findById(subContentId);
+                if (areaContent != null) {
+                    detail.setMapx(areaContent.getMapx());
+                    detail.setMapy(areaContent.getMapy());
+                } else {
+                    // API를 통해 좌표 정보 가져오기
+                    AreaBasedContents newAreaContent = fetchAreaBasedContentFromAPI(subContentId);
+                    if (newAreaContent != null) {
+                        // 데이터베이스에 삽입
+                        areaBasedContentsDao.insertAreaBasedContent(newAreaContent);
+                        detail.setMapx(newAreaContent.getMapx());
+                        detail.setMapy(newAreaContent.getMapy());
+                    } else {
+                        detail.setMapx(null);
+                        detail.setMapy(null);
+                    }
+                }
+            }
+        }
 
         return courseDetails;
     }
@@ -251,5 +285,135 @@ public class TourCourseServiceImpl implements TourCourseService {
         response.setCurrentPage(page);
 
         return response;
+    }
+
+    private AreaBasedContents fetchCourseOverviewFromAPI(int contentId) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+
+        URI url = UriComponentsBuilder.fromHttpUrl(detailCommonUrl)
+                .queryParam("serviceKey", serviceKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("contentId", contentId)
+                .queryParam("defaultYN", "Y")
+                .queryParam("overviewYN", "Y")
+                .queryParam("_type", "json")
+                .build(true)
+                .toUri();
+
+        // API 요청 URL 로깅
+        System.out.println("API 요청 URL: " + url);
+
+        String responseStr = restTemplate.getForObject(url, String.class);
+
+        // API 응답 로깅
+        System.out.println("API 응답: " + responseStr);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode rootNode = objectMapper.readTree(responseStr);
+        JsonNode responseNode = rootNode.path("response");
+        JsonNode headerNode = responseNode.path("header");
+        String resultCode = headerNode.path("resultCode").asText();
+
+        if (!"0000".equals(resultCode)) {
+            String resultMsg = headerNode.path("resultMsg").asText();
+            throw new Exception("API 에러: " + resultMsg);
+        }
+
+        JsonNode bodyNode = responseNode.path("body");
+        JsonNode itemsNode = bodyNode.path("items");
+        JsonNode itemNode = itemsNode.path("item");
+
+        if (itemNode.isMissingNode()) {
+            throw new Exception("API 응답에 item이 없습니다.");
+        }
+
+        if (itemNode.isArray()) {
+            itemNode = itemNode.get(0); // 첫 번째 아이템 사용
+        }
+
+        AreaBasedContents areaContent = new AreaBasedContents();
+        areaContent.setContentid(contentId);
+        areaContent.setTitle(itemNode.path("title").asText());
+        areaContent.setOverview(itemNode.path("overview").asText());
+        areaContent.setCreatedtime(LocalDateTime.now());
+        areaContent.setModifiedtime(LocalDateTime.now());
+        // 필요한 경우 추가 필드 설정
+
+        return areaContent;
+    }
+
+    private List<CourseDetail> getCourseDetailsList(int contentId) throws Exception {
+        // 데이터베이스에서 코스 상세 정보 조회
+        List<CourseDetail> courseDetails = courseDetailDao.findByContentId(contentId);
+        if (courseDetails == null || courseDetails.isEmpty()) {
+            // API를 통해 코스 상세 정보 가져오기
+            courseDetails = fetchCourseDetailsFromAPI(contentId);
+            if (courseDetails != null && !courseDetails.isEmpty()) {
+                // 기존 데이터 삭제 후 삽입
+                courseDetailDao.deleteByContentId(contentId);
+                courseDetailDao.insertCourseDetails(courseDetails);
+            } else {
+                throw new Exception("API에서 코스 상세 정보를 가져오지 못했습니다.");
+            }
+        }
+        return courseDetails;
+    }
+
+    private AreaBasedContents fetchAreaBasedContentFromAPI(int contentId) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+
+        URI url = UriComponentsBuilder.fromHttpUrl(detailCommonUrl)
+                .queryParam("serviceKey", serviceKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("contentId", contentId)
+                .queryParam("defaultYN", "Y")
+                .queryParam("mapinfoYN", "Y")
+                .queryParam("addrinfoYN", "Y")
+                .queryParam("_type", "json")
+                .build(true)
+                .toUri();
+
+        String responseStr = restTemplate.getForObject(url, String.class);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode rootNode = objectMapper.readTree(responseStr);
+        JsonNode responseNode = rootNode.path("response");
+        JsonNode headerNode = responseNode.path("header");
+        String resultCode = headerNode.path("resultCode").asText();
+
+        if (!"0000".equals(resultCode)) {
+            String resultMsg = headerNode.path("resultMsg").asText();
+            throw new Exception("API 에러: " + resultMsg);
+        }
+
+        JsonNode bodyNode = responseNode.path("body");
+        JsonNode itemsNode = bodyNode.path("items");
+        JsonNode itemNode = itemsNode.path("item");
+
+        if (itemNode.isMissingNode()) {
+            throw new Exception("API 응답에 item이 없습니다.");
+        }
+
+        if (itemNode.isArray()) {
+            itemNode = itemNode.get(0); // 첫 번째 아이템 사용
+        }
+
+        AreaBasedContents areaContent = new AreaBasedContents();
+        areaContent.setContentid(contentId);
+        areaContent.setTitle(itemNode.path("title").asText());
+        areaContent.setMapx(itemNode.path("mapx").asDouble());
+        areaContent.setMapy(itemNode.path("mapy").asDouble());
+        areaContent.setAddr1(itemNode.path("addr1").asText());
+        areaContent.setAddr2(itemNode.path("addr2").asText());
+        areaContent.setZipcode(itemNode.path("zipcode").asText());
+        areaContent.setCreatedtime(LocalDateTime.now());
+        areaContent.setModifiedtime(LocalDateTime.now());
+        // 필요한 경우 추가 필드 설정
+
+        return areaContent;
     }
 }

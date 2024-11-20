@@ -3,6 +3,7 @@ package com.bho.catchtrippingbackend.tourcourse.controller;
 import com.bho.catchtrippingbackend.attractions.dto.response.AttractionCustomResponse;
 import com.bho.catchtrippingbackend.tourcourse.dto.CourseDetail;
 import com.bho.catchtrippingbackend.tourcourse.dto.request.TourCourseListRequest;
+import com.bho.catchtrippingbackend.tourcourse.dto.response.CourseDetailsResponse;
 import com.bho.catchtrippingbackend.tourcourse.dto.response.TourCourseSummaryResponse;
 import com.bho.catchtrippingbackend.tourcourse.service.TourCourseService;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,10 @@ public class TourCourseController {
     }
 
     @GetMapping("/{contentId}/details")
-    public ResponseEntity<AttractionCustomResponse<List<CourseDetail>>> getCourseDetails(@PathVariable int contentId) {
+    public ResponseEntity<AttractionCustomResponse<CourseDetailsResponse>> getCourseDetails(@PathVariable int contentId) {
         try {
-            List<CourseDetail> courseDetails = tourCourseService.getCourseDetails(contentId);
-            return ResponseEntity.ok(AttractionCustomResponse.success(courseDetails));
+            CourseDetailsResponse response = tourCourseService.getCourseDetails(contentId);
+            return ResponseEntity.ok(AttractionCustomResponse.success(response));
         } catch (Exception e) {
             return ResponseEntity.status(500)
                     .body(AttractionCustomResponse.error(500, "INTERNAL_SERVER_ERROR", e.getMessage()));

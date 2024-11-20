@@ -28,15 +28,15 @@ public class TourCourseTests {
 
     }
 
-    @Test
-    void testTourcourse() throws Exception {
-        // Spring Boot의 컨텍스트 로딩 확인용 기본 메서드
-        List<CourseDetail> list=service.getCourseDetails(1846248);
-        for (CourseDetail courseDetail : list) {
-            System.out.println("항목 구분");
-            System.out.println(courseDetail);
-        }
-    }
+//    @Test
+//    void testTourcourse() throws Exception {
+//        // Spring Boot의 컨텍스트 로딩 확인용 기본 메서드
+//        List<CourseDetail> list=service.getCourseDetails(1846248);
+//        for (CourseDetail courseDetail : list) {
+//            System.out.println("항목 구분");
+//            System.out.println(courseDetail);
+//        }
+//    }
 
     @Test
     void testTourcourseList() throws Exception {

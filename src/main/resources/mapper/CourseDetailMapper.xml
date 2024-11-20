@@ -24,18 +24,26 @@
         SELECT * FROM course_details WHERE content_id = #{contentId}
     </select>
 
-    <!-- 코스 상세 정보 삽입 -->
-    <insert id="insertCourseDetails" parameterType="java.util.List">
-        INSERT INTO course_details (content_id, sub_content_id, sub_name, sub_overview, sub_detail_img, sub_detail_alt, serialnum, subnum)
-        VALUES
-        <foreach collection="list" item="item" separator=",">
-            (#{item.contentId}, #{item.subContentId}, #{item.subName}, #{item.subOverview}, #{item.subDetailImg}, #{item.subDetailAlt}, #{item.serialnum}, #{item.subnum})
-        </foreach>
-    </insert>
+<!--    &lt;!&ndash; 코스 상세 정보 삽입 &ndash;&gt;-->
+<!--    <insert id="insertCourseDetails" parameterType="java.util.List">-->
+<!--        INSERT INTO course_details (content_id, sub_content_id, sub_name, sub_overview, sub_detail_img, sub_detail_alt, serialnum, subnum)-->
+<!--        VALUES-->
+<!--        <foreach collection="list" item="item" separator=",">-->
+<!--            (#{item.contentId}, #{item.subContentId}, #{item.subName}, #{item.subOverview}, #{item.subDetailImg}, #{item.subDetailAlt}, #{item.serialnum}, #{item.subnum})-->
+<!--        </foreach>-->
+<!--    </insert>-->
 
     <!-- 코스 상세 정보 삭제 -->
     <delete id="deleteByContentId" parameterType="int">
         DELETE FROM course_details WHERE content_id = #{contentId}
     </delete>
+
+    <insert id="insertCourseDetails" parameterType="java.util.List">
+        INSERT INTO course_details (content_id, sub_content_id, sub_name, sub_overview, sub_detail_img, sub_detail_alt, serialnum, subnum, mapx, mapy)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.contentId}, #{item.subContentId}, #{item.subName}, #{item.subOverview}, #{item.subDetailImg}, #{item.subDetailAlt}, #{item.serialnum}, #{item.subnum}, #{item.mapx}, #{item.mapy})
+        </foreach>
+    </insert>
 
 </mapper>

@@ -380,4 +380,23 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
+    <!-- AreaBasedContents 삽입 -->
+    <insert id="insertAreaBasedContent" parameterType="com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents">
+        INSERT INTO area_based_contents (contentid, title, mapx, mapy, addr1, addr2, zipcode, createdtime, modifiedtime, overview)
+        VALUES (#{contentid}, #{title}, #{mapx}, #{mapy}, #{addr1}, #{addr2}, #{zipcode}, #{createdtime}, #{modifiedtime}, #{overview})
+    </insert>
+
+    <!-- AreaBasedContents 업데이트 -->
+    <update id="updateAreaBasedContent" parameterType="com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents">
+        UPDATE area_based_contents
+        SET title = #{title},
+            mapx = #{mapx},
+            mapy = #{mapy},
+            addr1 = #{addr1},
+            addr2 = #{addr2},
+            zipcode = #{zipcode},
+            modifiedtime = #{modifiedtime},
+            overview = #{overview}
+        WHERE contentid = #{contentid}
+    </update>
 </mapper>

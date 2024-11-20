@@ -105,4 +105,10 @@ public interface AreaBasedContentsDao {
                                             @Param("sigunguCode") Integer sigunguCode,
                                             @Param("limit") int limit,
                                             @Param("offset") int offset);
+
+    // AreaBasedContents 삽입
+    void insertAreaBasedContent(AreaBasedContents areaBasedContents);
+
+    // AreaBasedContents 업데이트
+    void updateAreaBasedContent(AreaBasedContents areaBasedContents);
 }
