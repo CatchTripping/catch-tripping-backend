@@ -1,5 +1,6 @@
 package com.bho.catchtrippingbackend.board.service;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
 import com.bho.catchtrippingbackend.board.dao.BoardImageDao;
@@ -10,6 +11,7 @@ import com.bho.catchtrippingbackend.board.entity.BoardLike;
 import com.bho.catchtrippingbackend.error.SystemException;
 import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
 import com.bho.catchtrippingbackend.error.code.ServerErrorCode;
+import com.bho.catchtrippingbackend.s3.service.S3Service;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +32,10 @@ public class BoardService {
     private final UserDao userDao;
     private final BoardLikeDao boardLikeDao;
     private final BoardImageDao boardImageDao;
-
-    private final AmazonS3 amazonS3Client;
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucketName;
+    private final S3Service s3Service;
 
     @Transactional
-    public BoardDetailDto save(Long userId, BoardSaveRequestDto requestDto) {
+    public void save(Long userId, BoardSaveRequestDto requestDto) {
         if (requestDto.imageKeys().isEmpty()) {
             throw new SystemException(ClientErrorCode.INVALID_IMAGE_COUNT);
         }
@@ -47,26 +45,32 @@ public class BoardService {
                 .user(user)
                 .content(requestDto.content())
                 .build();
+
+        log.info("Inserting Board: userId={}, content={}", user.getUserId(), requestDto.content());
         boardDao.save(board);
+        log.info("Board saved with ID: {}", board.getId());
+
+        // board.getId() 검증
+        if (board.getId() == null) {
+            throw new SystemException(ServerErrorCode.DATABASE_ERROR);
+        }
 
         // 이미지 키 저장
         requestDto.imageKeys().forEach(key -> boardImageDao.save(board.getId(), key));
 
         log.info("게시글 저장 완료: Board ID = {}", board.getId());
-        return BoardDetailDto.from(board);
-
-//        log.info("유저 이름 : {}", userId);
-//        User user = getUserById(userId);
-//
-//        saveBoard(user, requestDto);
     }
 
     @Transactional(readOnly = true)
     public BoardDetailDto findBoardDetailById(Long boardId) {
         log.info("Fetching board with ID: {}", boardId);
         Board board = getBoardById(boardId);
+        List<String> imageKeys = boardImageDao.findKeysByBoardId(boardId);
 
-        return BoardDetailDto.from(board);
+        // 키를 Presigned URL로 반환
+        List<String> imageUrls = generateImageUrls(imageKeys);
+
+        return BoardDetailDto.from(board, imageUrls);
     }
 
     @Transactional
@@ -78,7 +82,13 @@ public class BoardService {
         board.update(requestDto.content());
         boardDao.update(board);
 
-        return BoardDetailDto.from(board);
+        // 기존 이미지 키 가져오기
+        List<String> imageKeys = boardImageDao.findKeysByBoardId(boardId);
+
+        // 키를 Presigned GET URL로 변환
+        List<String> imageUrls = generateImageUrls(imageKeys);
+
+        return BoardDetailDto.from(board, imageUrls);
     }
 
     @Transactional
@@ -89,7 +99,7 @@ public class BoardService {
 
         // 이미지 삭제
         List<String> imageKeys = boardImageDao.findKeysByBoardId(boardId);
-        imageKeys.forEach(this::deleteImageFromS3);
+        imageKeys.forEach(s3Service::deleteObject);
 
         boardDao.delete(boardId);
         log.info("게시글 삭제 완료: Board ID = {}", boardId);
@@ -102,15 +112,6 @@ public class BoardService {
         return boards.stream()
                 .map(BoardPreviewDto::from)
                 .collect(Collectors.toList());
-    }
-
-    private void deleteImageFromS3(String key) {
-        try {
-            amazonS3Client.deleteObject(bucketName, key);
-        } catch (Exception e) {
-            log.error("Failed to delete image from S3: {}", key, e);
-            throw new SystemException(ServerErrorCode.IMAGE_DELETE_FAILED);
-        }
     }
 
     @Transactional
@@ -188,5 +189,11 @@ public class BoardService {
         if (result != 1) {
             throw new SystemException(ServerErrorCode.DATABASE_ERROR);
         }
+    }
+
+    private List<String> generateImageUrls(List<String> keys) {
+        return keys.stream()
+                .map(key -> s3Service.generatePresignedUrl(key, HttpMethod.GET))
+                .collect(Collectors.toList());
     }
 }

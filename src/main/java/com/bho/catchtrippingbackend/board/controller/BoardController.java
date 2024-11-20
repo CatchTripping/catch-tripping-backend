@@ -21,12 +21,12 @@ public class BoardController {
     private final BoardService boardService;
 
     @PostMapping
-    public ResponseEntity<BoardDetailDto> save(
+    public ResponseEntity<String> save(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody BoardSaveRequestDto requestDTO) {
-        BoardDetailDto savedBoard = boardService.save(userDetails.getUserId(), requestDTO);
+        boardService.save(userDetails.getUserId(), requestDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedBoard);
+        return ResponseEntity.ok("저장 완료");
     }
 
     @GetMapping("/{boardId}")

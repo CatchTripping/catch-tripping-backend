@@ -15,12 +15,12 @@ public record BoardDetailDto(
         String updatedDate,
         String updatedAt
 ) {
-    public static BoardDetailDto from(Board board) {
+    public static BoardDetailDto from(Board board, List<String> imageUrls) {
         return new BoardDetailDto(
                 board.getId(),
                 board.getUser().getUserName(),
                 board.getContent(),
-                board.getImageUrls(),
+                imageUrls,
                 board.getCreatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
                 board.getCreatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
                 board.getUpdatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),

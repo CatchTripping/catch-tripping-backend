@@ -28,13 +28,11 @@ public class S3Service {
                 .withMethod(method)
                 .withExpiration(expiration);
 
-//        if (method == HttpMethod.PUT) {
-//            request.addRequestParameter(Headers.S3_CANNED_ACL, CannedAccessControlList.PublicRead.toString());
-//        }
+        return amazonS3Client.generatePresignedUrl(request).toString();
+    }
 
-        URL url = amazonS3Client.generatePresignedUrl(request);
-
-        return url.toString();
+    public void deleteObject(String key) {
+        amazonS3Client.deleteObject(bucket, key);
     }
 
     private static Date getExpiration() {
