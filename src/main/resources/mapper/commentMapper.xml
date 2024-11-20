@@ -114,4 +114,14 @@
             c.created_at ASC
     </select>
 
+    <update id="update" parameterType="Comment">
+        UPDATE comment
+        SET
+            content = #{content},
+            updated_at = #{updatedAt}
+        WHERE
+            id = #{id}
+    </update>
+
+
 </mapper>

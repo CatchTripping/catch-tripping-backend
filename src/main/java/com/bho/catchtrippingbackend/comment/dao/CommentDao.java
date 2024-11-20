@@ -7,4 +7,5 @@ import org.apache.ibatis.annotations.Mapper;
 public interface CommentDao {
     int save(Comment comment);
     Comment findById(Long commentId);
+    int update(Comment comment);
 }

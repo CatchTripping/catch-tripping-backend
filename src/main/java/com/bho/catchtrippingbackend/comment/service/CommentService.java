@@ -5,6 +5,7 @@ import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.comment.dao.CommentDao;
 import com.bho.catchtrippingbackend.comment.dto.CommentResponseDto;
 import com.bho.catchtrippingbackend.comment.dto.CommentSaveRequestDto;
+import com.bho.catchtrippingbackend.comment.dto.CommentUpdateRequestDto;
 import com.bho.catchtrippingbackend.comment.entity.Comment;
 import com.bho.catchtrippingbackend.error.SystemException;
 import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
@@ -13,6 +14,7 @@ import com.bho.catchtrippingbackend.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ public class CommentService {
     private final UserDao userDao;
     private final BoardDao boardDao;
 
-
+    @Transactional
     public void save(Long userId, CommentSaveRequestDto requestDto) {
         User user = getUserById(userId);
         Board board = getBoardById(requestDto.boardId());
@@ -32,10 +34,33 @@ public class CommentService {
         Comment parentComment = getParentCommentById(requestDto.parentCommentId());
 
         Comment comment = saveComment(user, board, parentComment, requestDto);
+
+        //id, createdAt, updateAt를 어떻게 구해올지 고민 됨.
 //        log.info(CommentResponseDto.fromComment(comment).toString());
 
 //        return CommentResponseDto.from(comment);
     }
+
+    @Transactional
+    public CommentResponseDto update(Long userId, CommentUpdateRequestDto requestDto) {
+        Comment comment = getCommentById(requestDto.commentId());
+
+        validateCommentAuthor(userId, comment.getUser().getUserId());
+
+        comment.update(requestDto.content());
+
+        return CommentResponseDto.from(comment);
+
+    }
+
+    private void validateCommentAuthor(Long userId, Long commentId) {
+        if (userId != commentId) {
+            throw new SystemException(ClientErrorCode.FORBIDDEN_USER_ACCESS);
+        }
+    }
+
+
+
 
     private Comment getParentCommentById(Long parentCommentId) {
         if (parentCommentId == null) {
