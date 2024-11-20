@@ -184,10 +184,15 @@ public class TourCourseServiceImpl implements TourCourseService {
         int offset = (page - 1) * pageSize;
 
         // 총 아이템 수 조회
-        int totalItems = areaBasedContentsDao.countTourCourses(request.getAreaCode());
+        int totalItems = areaBasedContentsDao.countTourCourses(request.getAreaCode(), request.getSigunguCode());
 
         // 코스 목록 조회
-        List<AreaBasedContents> courses = areaBasedContentsDao.findTourCourses(request.getAreaCode(), pageSize, offset);
+        List<AreaBasedContents> courses = areaBasedContentsDao.findTourCourses(
+                request.getAreaCode(),
+                request.getSigunguCode(),
+                pageSize,
+                offset
+        );
 
         // 응답 데이터 매핑
         List<TourCourseSummaryResponse.TourCourseSummary> courseSummaries = new ArrayList<>();

@@ -96,11 +96,13 @@ public interface AreaBasedContentsDao {
             @Param("distance") double distance
     );
 
-    // 총 코스 개수 조회 메서드 추가
-    int countTourCourses(@Param("areaCode") Integer areaCode);
+    // 총 코스 개수 조회 메서드 수정
+    int countTourCourses(@Param("areaCode") Integer areaCode,
+                         @Param("sigunguCode") Integer sigunguCode);
 
-    // 코스 목록 조회 메서드 추가
+    // 코스 목록 조회 메서드 수정
     List<AreaBasedContents> findTourCourses(@Param("areaCode") Integer areaCode,
+                                            @Param("sigunguCode") Integer sigunguCode,
                                             @Param("limit") int limit,
                                             @Param("offset") int offset);
 }
