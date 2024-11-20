@@ -34,9 +34,9 @@ class TravelRecommendationServiceTests {
     @Test
     void testGptService() {
         TravelRecommendationRequest request = new TravelRecommendationRequest();
-        request.setSelectedTravelType("이별 후 휴식");
-        request.setBudgetRange("10만원 이하");
-        request.setActivities(Arrays.asList("휴식"));
+        request.setSelectedTravelType("혼자 크리스마스 보낼 때");
+        request.setBudgetRange("5만원 이하");
+        request.setActivities(Arrays.asList("헌팅"));
         request.setTravelDuration("2일");
 
         try {

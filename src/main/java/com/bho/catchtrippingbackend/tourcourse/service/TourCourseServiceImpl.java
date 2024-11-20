@@ -1,9 +1,17 @@
 package com.bho.catchtrippingbackend.tourcourse.service;
 
+import com.bho.catchtrippingbackend.attractions.dao.AreaBasedContentsDao;
+import com.bho.catchtrippingbackend.attractions.dao.AreaCodesDao;
 import com.bho.catchtrippingbackend.attractions.dao.ContentDetailsDao;
+import com.bho.catchtrippingbackend.attractions.dao.SigunguCodesDao;
+import com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents;
+import com.bho.catchtrippingbackend.attractions.dto.AreaCodes;
 import com.bho.catchtrippingbackend.attractions.dto.ContentDetails;
+import com.bho.catchtrippingbackend.attractions.dto.SigunguCodes;
 import com.bho.catchtrippingbackend.tourcourse.dao.CourseDetailDao;
 import com.bho.catchtrippingbackend.tourcourse.dto.CourseDetail;
+import com.bho.catchtrippingbackend.tourcourse.dto.request.TourCourseListRequest;
+import com.bho.catchtrippingbackend.tourcourse.dto.response.TourCourseSummaryResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +27,9 @@ import java.util.List;
 public class TourCourseServiceImpl implements TourCourseService {
     private final CourseDetailDao courseDetailDao;
     private final ContentDetailsDao contentDetailsDao;
+    private final AreaCodesDao areaCodesDao;
+    private final SigunguCodesDao sigunguCodesDao;
+    private final AreaBasedContentsDao areaBasedContentsDao;
 
     @Value("${tourapi.serviceKey}")
     private String serviceKey;
@@ -26,9 +37,16 @@ public class TourCourseServiceImpl implements TourCourseService {
     @Value("${tourapi.tourcourse.detailInfoUrl}")
     private String detailInfoUrl;
 
-    public TourCourseServiceImpl(CourseDetailDao courseDetailDao, ContentDetailsDao contentDetailsDao) {
+    public TourCourseServiceImpl(CourseDetailDao courseDetailDao,
+                                 ContentDetailsDao contentDetailsDao,
+                                 AreaCodesDao areaCodesDao,
+                                 SigunguCodesDao sigunguCodesDao,
+                                 AreaBasedContentsDao areaBasedContentsDao) {
         this.courseDetailDao = courseDetailDao;
         this.contentDetailsDao = contentDetailsDao;
+        this.areaCodesDao = areaCodesDao;
+        this.sigunguCodesDao = sigunguCodesDao;
+        this.areaBasedContentsDao = areaBasedContentsDao;
     }
 
     @Override
@@ -157,5 +175,76 @@ public class TourCourseServiceImpl implements TourCourseService {
 
         // 필요한 경우 contentDetails에 infoname, infotext 등을 저장하는 로직을 추가
         // 하지만 `content_details` 테이블을 수정하지 않기로 하였으므로 여기서는 저장하지 않습니다.
+    }
+
+    @Override
+    public TourCourseSummaryResponse getTourCourses(TourCourseListRequest request) throws Exception {
+        int page = request.getPage();
+        int pageSize = request.getPageSize();
+        int offset = (page - 1) * pageSize;
+
+        // 총 아이템 수 조회
+        int totalItems = areaBasedContentsDao.countTourCourses(request.getAreaCode());
+
+        // 코스 목록 조회
+        List<AreaBasedContents> courses = areaBasedContentsDao.findTourCourses(request.getAreaCode(), pageSize, offset);
+
+        // 응답 데이터 매핑
+        List<TourCourseSummaryResponse.TourCourseSummary> courseSummaries = new ArrayList<>();
+        for (AreaBasedContents course : courses) {
+            TourCourseSummaryResponse.TourCourseSummary summary = new TourCourseSummaryResponse.TourCourseSummary();
+            summary.setContentId(course.getContentid());
+            summary.setTitle(course.getTitle());
+            summary.setCat3(course.getCat3());
+            summary.setFirstImage(course.getFirstimage());
+            summary.setFirstImage2(course.getFirstimage2());
+            summary.setAreaCode(course.getAreacode());
+
+            // 지역 이름 조회
+            AreaCodes areaCode = areaCodesDao.findByAreaCode(course.getAreacode());
+            if (areaCode != null) {
+                summary.setAreaName(areaCode.getAreaName());
+            }
+
+            // 시군구 이름 조회
+            SigunguCodes sigunguCode = sigunguCodesDao.findByAreaCodeAndSigunguCode(course.getAreacode(), course.getSigungucode());
+            if (sigunguCode != null) {
+                summary.setSigunguCode(sigunguCode.getSigunguCode());
+                summary.setSigunguName(sigunguCode.getSigunguName());
+            }
+
+            // 포함된 여행지의 이름 목록 조회
+            List<CourseDetail> courseDetails = courseDetailDao.findByContentId(course.getContentid());
+            List<String> destinations = new ArrayList<>();
+            if (courseDetails != null && !courseDetails.isEmpty()) {
+                for (CourseDetail detail : courseDetails) {
+                    destinations.add(detail.getSubName());
+                }
+            } else {
+                // API를 통해 데이터 가져오기
+                courseDetails = fetchCourseDetailsFromAPI(course.getContentid());
+                if (courseDetails != null && !courseDetails.isEmpty()) {
+                    // 기존 데이터 삭제 후 삽입
+                    courseDetailDao.deleteByContentId(course.getContentid());
+                    courseDetailDao.insertCourseDetails(courseDetails);
+                    for (CourseDetail detail : courseDetails) {
+                        destinations.add(detail.getSubName());
+                    }
+                }
+            }
+            summary.setDestinations(destinations);
+
+            courseSummaries.add(summary);
+        }
+
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
+        TourCourseSummaryResponse response = new TourCourseSummaryResponse();
+        response.setCourses(courseSummaries);
+        response.setTotalItems(totalItems);
+        response.setTotalPages(totalPages);
+        response.setCurrentPage(page);
+
+        return response;
     }
 }

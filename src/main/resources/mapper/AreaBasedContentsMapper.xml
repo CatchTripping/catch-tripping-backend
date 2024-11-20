@@ -352,4 +352,26 @@
             ) &lt; #{distance} * 1000
     </select>
 
+    <!-- 총 코스 개수 조회 -->
+    <select id="countTourCourses" parameterType="java.lang.Integer" resultType="int">
+        SELECT COUNT(*)
+        FROM area_based_contents
+        WHERE contenttypeid = 25
+        <if test="areaCode != null">
+            AND areacode = #{areaCode}
+        </if>
+    </select>
+
+    <!-- 코스 목록 조회 -->
+    <select id="findTourCourses" parameterType="map" resultMap="AreaBasedContentsMap">
+        SELECT *
+        FROM area_based_contents
+        WHERE contenttypeid = 25
+        <if test="areaCode != null">
+            AND areacode = #{areaCode}
+        </if>
+        ORDER BY contentid DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
 </mapper>
