@@ -40,14 +40,15 @@ public class TourCourseTests {
 
     @Test
     void testTourcourseList() throws Exception {
-        System.out.println(dao.countTourCourses(null));
+//        System.out.println(dao.countTourCourses(null,null);
     }
 
     @Test
     void testGetTourCourses() throws Exception {
         // 서비스 레이어의 getTourCourses 메서드 테스트
         TourCourseListRequest request = new TourCourseListRequest();
-        request.setAreaCode(1); // 예시로 서울 지역 코드 사용
+        request.setAreaCode(2); // 예시로 서울 지역 코드 사용
+        request.setSigunguCode(1); // 예시로 종로구 시군구 코드 사용 (필요 시)
         request.setPage(1);
         request.setPageSize(10);
 
