@@ -353,12 +353,15 @@
     </select>
 
     <!-- 총 코스 개수 조회 -->
-    <select id="countTourCourses" parameterType="java.lang.Integer" resultType="int">
+    <select id="countTourCourses" parameterType="map" resultType="int">
         SELECT COUNT(*)
         FROM area_based_contents
         WHERE contenttypeid = 25
         <if test="areaCode != null">
             AND areacode = #{areaCode}
+        </if>
+        <if test="sigunguCode != null">
+            AND sigungucode = #{sigunguCode}
         </if>
     </select>
 
@@ -369,6 +372,9 @@
         WHERE contenttypeid = 25
         <if test="areaCode != null">
             AND areacode = #{areaCode}
+        </if>
+        <if test="sigunguCode != null">
+            AND sigungucode = #{sigunguCode}
         </if>
         ORDER BY contentid DESC
         LIMIT #{limit} OFFSET #{offset}
