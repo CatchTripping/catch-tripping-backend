@@ -17,7 +17,6 @@ public class Comment {
     private Board board;
     private String content;
     private Comment parentComment;
-    private List<Comment> childComments;
     private boolean deleted;
     private int depth;
     private LocalDateTime createdAt;

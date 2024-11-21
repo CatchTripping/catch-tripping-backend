@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/comment")
@@ -46,5 +48,27 @@ public class CommentController {
         CommentResponseDto responseDto = commentService.delete(userDetails.getUserId(), requestDto);
 
         return ResponseEntity.ok(responseDto);
+    }
+
+    @GetMapping("/{diaryId}")
+    public ResponseEntity<List<CommentResponseDto>> findParentCommentsWithPaging(
+            @PathVariable("diaryId") Long diaryId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
+
+        List<CommentResponseDto> parentComments = commentService.findParentCommentsWithPaging(diaryId, page, size);
+
+        return ResponseEntity.ok(parentComments);
+    }
+
+    @GetMapping("/child-comments/{parentId}")
+    public ResponseEntity<List<CommentResponseDto>> findChildCommentsWithPaging(
+            @PathVariable("parentId") Long parentId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
+
+        List<CommentResponseDto> childComments = commentService.findChildCommentsWithPaging(parentId, page, size);
+
+        return ResponseEntity.ok(childComments);
     }
 }

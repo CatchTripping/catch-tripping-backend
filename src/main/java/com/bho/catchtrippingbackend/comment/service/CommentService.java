@@ -17,6 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -70,6 +73,26 @@ public class CommentService {
         commentDao.delete(comment);
 
         return CommentResponseDto.fromDeleted(comment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentResponseDto> findParentCommentsWithPaging(Long boardId, int page, int size) {
+        int offset = (page - 1) * size;
+        List<Comment> parentComments = commentDao.findParentCommentsWithPaging(boardId, size, offset);
+
+        return parentComments.stream()
+                .map(CommentResponseDto::fromComment)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentResponseDto> findChildCommentsWithPaging(Long parentId, int page, int size) {
+        int offset = (page - 1) * size;
+        List<Comment> childComments = commentDao.findChildCommentsWithPaging(parentId, size, offset);
+
+        return childComments.stream()
+                .map(CommentResponseDto::fromComment)
+                .collect(Collectors.toList());
     }
 
 

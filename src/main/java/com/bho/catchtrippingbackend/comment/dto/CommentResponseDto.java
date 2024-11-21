@@ -14,7 +14,8 @@ public record CommentResponseDto(
         int depth,
         String createdDate,
         String createdAt,
-        List<CommentResponseDto> childComments
+        String updatedDate,
+        String updatedAt
 ) {
     public static CommentResponseDto from (Comment comment) {
         return new CommentResponseDto(
@@ -25,7 +26,8 @@ public record CommentResponseDto(
                 comment.getDepth(),
                 comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
                 comment.getCreatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
-                comment.getChildComments().stream().map(CommentResponseDto::fromComment).collect(Collectors.toList())
+                comment.getUpdatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
+                comment.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm"))
         );
     }
 
@@ -38,7 +40,8 @@ public record CommentResponseDto(
                 comment.getDepth(),
                 null,
                 null,
-                comment.getChildComments().stream().map(CommentResponseDto::fromComment).collect(Collectors.toList())
+                null,
+                null
         );
     }
 
