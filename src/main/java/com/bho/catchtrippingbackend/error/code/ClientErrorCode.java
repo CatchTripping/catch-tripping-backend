@@ -24,7 +24,8 @@ public enum ClientErrorCode implements ErrorCodeModel{
     BOARD_LIKE_NOT_FOUND(404, "BOARD_LIKE_NOT_FOUND", "좋아요를 찾을 수 없습니다."),
     // 댓글 관련 오류
     COMMENT_NOT_FOUND(404, "COMMENT_NOT_FOUND", "해당 댓글을 찾을 수 없습니다."),
-    COMMENT_DEPTH_EXCEEDED_ERR(400, "COMMENT_DEPTH_EXCEEDED_ERR", "댓글은 대댓글까지만 허용합니다.")
+    COMMENT_DEPTH_EXCEEDED_ERR(400, "COMMENT_DEPTH_EXCEEDED_ERR", "댓글은 대댓글까지만 허용합니다."),
+    COMMENT_ALREADY_DELETED_ERR(400, "COMMENT_ALREADY_DELETED_ERR", "이미 삭제된 댓글입니다.")
     ;
 
     private final int statusCode;

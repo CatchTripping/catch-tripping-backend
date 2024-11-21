@@ -111,8 +111,15 @@
         SET
             content = #{content},
             updated_at = #{updatedAt}
-        WHERE
-            id = #{id}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete" parameterType="Comment">
+        UPDATE comment
+        SET
+            is_deleted = #{deleted},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
     </update>
 
 

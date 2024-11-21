@@ -3,6 +3,7 @@ package com.bho.catchtrippingbackend.comment.service;
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
 import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.comment.dao.CommentDao;
+import com.bho.catchtrippingbackend.comment.dto.CommentDeleteRequestDto;
 import com.bho.catchtrippingbackend.comment.dto.CommentResponseDto;
 import com.bho.catchtrippingbackend.comment.dto.CommentSaveRequestDto;
 import com.bho.catchtrippingbackend.comment.dto.CommentUpdateRequestDto;
@@ -53,6 +54,38 @@ public class CommentService {
 
         return CommentResponseDto.from(comment);
 
+    }
+
+    @Transactional
+    public CommentResponseDto delete(Long userId, CommentDeleteRequestDto requestDto) {
+        Comment comment = getCommentById(requestDto.commentId());
+
+        //board를 쓴 사람이거나 comment를 쓴 사람이면 통과
+        validateDeleteAuthorization(userId, comment);
+
+        validateNotDeleted(comment);
+
+        comment.delete();
+
+        commentDao.delete(comment);
+
+        return CommentResponseDto.fromDeleted(comment);
+    }
+
+
+
+    private void validateNotDeleted(Comment comment) {
+        if (comment.isDeleted()) {
+            throw new SystemException(ClientErrorCode.COMMENT_ALREADY_DELETED_ERR);
+        }
+    }
+
+    private void validateDeleteAuthorization(Long userId, Comment comment) {
+        boolean isAuthorized = userId.equals(comment.getUser().getUserId()) || userId.equals(comment.getBoard().getUser().getUserId());
+
+        if (!isAuthorized) {
+            throw new SystemException(ClientErrorCode.FORBIDDEN_USER_ACCESS);
+        }
     }
 
     private void validateCommentAuthor(Long userId, Long commentId) {

@@ -1,5 +1,6 @@
 package com.bho.catchtrippingbackend.comment.controller;
 
+import com.bho.catchtrippingbackend.comment.dto.CommentDeleteRequestDto;
 import com.bho.catchtrippingbackend.comment.dto.CommentResponseDto;
 import com.bho.catchtrippingbackend.comment.dto.CommentSaveRequestDto;
 import com.bho.catchtrippingbackend.comment.dto.CommentUpdateRequestDto;
@@ -37,4 +38,13 @@ public class CommentController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PatchMapping("/delete")
+    public ResponseEntity<CommentResponseDto> delete(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody CommentDeleteRequestDto requestDto) {
+
+        CommentResponseDto responseDto = commentService.delete(userDetails.getUserId(), requestDto);
+
+        return ResponseEntity.ok(responseDto);
+    }
 }
