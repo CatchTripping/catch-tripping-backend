@@ -68,20 +68,12 @@
             c.updated_at as updated_at,
             u.user_id,
             u.user_name,
-            u.user_email,
             u.profile_image,
-            u.created_at as user_created_at,
-            b.id as board_id,
-            b.content as board_content,
-            b.created_at as board_created_at,
-            b.updated_at as board_updated_at,
-            b.like_count
-        FROM
-            comments c
-                LEFT JOIN users u ON c.user_id = u.user_id
-                LEFT JOIN boards b ON c.board_id = b.id
-        WHERE
-            c.id = #{id}
+            b.id as board_id
+        FROM comment c
+        JOIN user u ON c.user_id = u.user_id
+        JOIN board b ON c.board_id = b.id
+        WHERE c.id = #{id}
     </select>
 
     <!-- Find Child Comments -->
@@ -105,9 +97,9 @@
             b.updated_at as board_updated_at,
             b.like_count
         FROM
-            comments c
-                LEFT JOIN users u ON c.user_id = u.user_id
-                LEFT JOIN boards b ON c.board_id = b.id
+            comment c
+                LEFT JOIN user u ON c.user_id = u.user_id
+                LEFT JOIN board b ON c.board_id = b.id
         WHERE
             c.parent_comment_id = #{id}
         ORDER BY

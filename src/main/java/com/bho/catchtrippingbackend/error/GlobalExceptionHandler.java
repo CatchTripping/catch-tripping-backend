@@ -3,13 +3,18 @@ package com.bho.catchtrippingbackend.error;
 import com.bho.catchtrippingbackend.error.code.ServerErrorCode;
 import com.bho.catchtrippingbackend.error.response.CustomResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * SystemException 처리
@@ -40,4 +45,10 @@ public class GlobalExceptionHandler {
                 .status(ServerErrorCode.UNEXPECTED_ERROR.getStatusCode())
                 .body(CustomResponse.error(ServerErrorCode.UNEXPECTED_ERROR));
     }
+
+//    @Override
+//    protected ResponseEntity<Object> handleExceptionInternal(
+//            Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request){
+//
+//    }
 }

@@ -49,12 +49,15 @@ public class CommentService {
 
         comment.update(requestDto.content());
 
+        commentDao.update(comment);
+
         return CommentResponseDto.from(comment);
 
     }
 
     private void validateCommentAuthor(Long userId, Long commentId) {
-        if (userId != commentId) {
+        log.info("userId : {}, commentId : {}", userId, commentId);
+        if (!userId.equals(commentId)) {
             throw new SystemException(ClientErrorCode.FORBIDDEN_USER_ACCESS);
         }
     }
