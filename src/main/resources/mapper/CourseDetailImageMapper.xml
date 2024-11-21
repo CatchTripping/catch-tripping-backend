@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bho.catchtrippingbackend.tourcourse.dao.CourseDetailImageDao">
+
+    <resultMap id="CourseDetailImageMap" type="com.bho.catchtrippingbackend.tourcourse.dto.CourseDetailImage">
+        <id property="id" column="id"/>
+        <result property="contentId" column="content_id"/>
+        <result property="originimgurl" column="originimgurl"/>
+        <result property="smallimageurl" column="smallimageurl"/>
+        <result property="imgname" column="imgname"/>
+        <result property="cpyrhtDivCd" column="cpyrhtDivCd"/>
+        <result property="serialnum" column="serialnum"/>
+    </resultMap>
+
+    <!-- 특정 콘텐츠 ID의 이미지 목록 조회 -->
+    <select id="findByContentId" parameterType="int" resultMap="CourseDetailImageMap">
+        SELECT * FROM course_detail_images WHERE content_id = #{contentId}
+    </select>
+
+    <!-- 이미지 정보 삽입 -->
+    <insert id="insertCourseDetailImages" parameterType="java.util.List">
+        INSERT INTO course_detail_images (content_id, originimgurl, smallimageurl, imgname, cpyrhtDivCd, serialnum)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.contentId}, #{item.originimgurl}, #{item.smallimageurl}, #{item.imgname}, #{item.cpyrhtDivCd}, #{item.serialnum})
+        </foreach>
+    </insert>
+
+    <!-- 특정 콘텐츠 ID의 이미지 정보 삭제 -->
+    <delete id="deleteByContentId" parameterType="int">
+        DELETE FROM course_detail_images WHERE content_id = #{contentId}
+    </delete>
+
+</mapper>

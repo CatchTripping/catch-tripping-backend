@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,4 +22,6 @@ public class CourseDetail {
     private String createdTime;
     private Double mapx;  // 추가된 필드 (경도)
     private Double mapy;  // 추가된 필드 (위도)
+
+    private List<CourseDetailImage> images;
 }

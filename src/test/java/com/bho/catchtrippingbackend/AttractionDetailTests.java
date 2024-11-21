@@ -30,7 +30,7 @@ class AttractionDetailTests {
     @Test
     public void testGetCourseDetails() throws Exception {
         // 테스트할 contentId 설정 (실제 존재하는 코스의 contentId로 변경해야 합니다)
-        int contentId = 1846248; // 실제로 존재하는 contentId로 변경하세요
+        int contentId = 2988349; // 실제로 존재하는 contentId로 변경하세요
 
         // 서비스 메서드 호출
         CourseDetailsResponse response = tourCourseService.getCourseDetails(contentId);
