@@ -39,6 +39,8 @@ public class Board {
     }
 
     public void decrementLikeCount() {
-        this.likeCount -= 1;
+        if (this.likeCount > 0) {
+            this.likeCount -= 1;
+        }
     }
 }

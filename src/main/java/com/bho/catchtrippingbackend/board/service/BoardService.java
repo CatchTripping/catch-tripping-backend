@@ -82,6 +82,9 @@ public class BoardService {
 
         BoardLike boardLike = requestDto.from(user, board);
 
+        board.incrementLikeCount();
+        boardDao.updateLike(board);
+
         boardLikeDao.save(boardLike);
     }
 
@@ -93,6 +96,9 @@ public class BoardService {
         validateBoardLikeExistence(user.getUserId(), board.getId());
 
         boardLikeDao.deleteByUserIdAndBoardId(user.getUserId(), board.getId());
+
+        board.decrementLikeCount();
+        boardDao.updateLike(board);
     }
 
     public void validateBoardLikeExistence(Long userId, Long boardId) {
