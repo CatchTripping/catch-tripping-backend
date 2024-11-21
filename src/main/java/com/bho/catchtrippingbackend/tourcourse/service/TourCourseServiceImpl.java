@@ -9,7 +9,9 @@ import com.bho.catchtrippingbackend.attractions.dto.AreaCodes;
 import com.bho.catchtrippingbackend.attractions.dto.ContentDetails;
 import com.bho.catchtrippingbackend.attractions.dto.SigunguCodes;
 import com.bho.catchtrippingbackend.tourcourse.dao.CourseDetailDao;
+import com.bho.catchtrippingbackend.tourcourse.dao.CourseDetailImageDao;
 import com.bho.catchtrippingbackend.tourcourse.dto.CourseDetail;
+import com.bho.catchtrippingbackend.tourcourse.dto.CourseDetailImage;
 import com.bho.catchtrippingbackend.tourcourse.dto.request.TourCourseListRequest;
 import com.bho.catchtrippingbackend.tourcourse.dto.response.CourseDetailsResponse;
 import com.bho.catchtrippingbackend.tourcourse.dto.response.TourCourseSummaryResponse;
@@ -18,10 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +38,7 @@ public class TourCourseServiceImpl implements TourCourseService {
     private final AreaCodesDao areaCodesDao;
     private final SigunguCodesDao sigunguCodesDao;
     private final AreaBasedContentsDao areaBasedContentsDao;
+    private final CourseDetailImageDao courseDetailImageDao;
 
     @Value("${tourapi.serviceKey}")
     private String serviceKey;
@@ -48,14 +53,17 @@ public class TourCourseServiceImpl implements TourCourseService {
                                  ContentDetailsDao contentDetailsDao,
                                  AreaCodesDao areaCodesDao,
                                  SigunguCodesDao sigunguCodesDao,
-                                 AreaBasedContentsDao areaBasedContentsDao) {
+                                 AreaBasedContentsDao areaBasedContentsDao,
+                                 CourseDetailImageDao courseDetailImageDao) {
         this.courseDetailDao = courseDetailDao;
         this.contentDetailsDao = contentDetailsDao;
         this.areaCodesDao = areaCodesDao;
         this.sigunguCodesDao = sigunguCodesDao;
         this.areaBasedContentsDao = areaBasedContentsDao;
+        this.courseDetailImageDao = courseDetailImageDao;
     }
 
+    @Transactional
     @Override
     public CourseDetailsResponse getCourseDetails(int contentId) throws Exception {
         // 데이터베이스에서 코스 정보 조회
@@ -76,9 +84,24 @@ public class TourCourseServiceImpl implements TourCourseService {
         // 코스 상세 정보 가져오기
         List<CourseDetail> courseDetails = getCourseDetailsList(contentId);
 
+        // 이미지 정보 가져오기
+        List<CourseDetailImage> images = courseDetailImageDao.findByContentId(contentId);
+        if (images == null || images.isEmpty()) {
+            // API를 통해 이미지 정보 가져오기
+            images = fetchCourseDetailImagesFromAPI(contentId);
+            if (images != null && !images.isEmpty()) {
+                // 기존 데이터 삭제 후 삽입
+                courseDetailImageDao.deleteByContentId(contentId);
+                courseDetailImageDao.insertCourseDetailImages(images);
+            } else {
+                images = new ArrayList<>();
+            }
+        }
+
         CourseDetailsResponse response = new CourseDetailsResponse();
         response.setOverview(course.getOverview());
         response.setCourseDetails(courseDetails);
+        response.setCourseImages(images); // 이미지 정보 추가
 
         return response;
     }
@@ -116,12 +139,15 @@ public class TourCourseServiceImpl implements TourCourseService {
         JsonNode bodyNode = responseNode.path("body");
         JsonNode itemsNode = bodyNode.path("items");
         JsonNode itemArray = itemsNode.path("item");
+        List<CourseDetail> courseDetails = new ArrayList<>();
 
         if (itemArray.isMissingNode()) {
-            throw new Exception("API 응답에 item이 없습니다.");
+            // 코스 상세 정보가 없는 경우 빈 리스트 반환
+            System.out.println("코스 상세 정보가 없는 경우 빈 리스트 반환");
+            return courseDetails;
         }
 
-        List<CourseDetail> courseDetails = new ArrayList<>();
+
 
         if (itemArray.isArray()) {
             for (JsonNode itemNode : itemArray) {
@@ -140,19 +166,32 @@ public class TourCourseServiceImpl implements TourCourseService {
         for (CourseDetail detail : courseDetails) {
             int subContentId = detail.getSubContentId();
             if (subContentId > 0) {
-                // areaBasedContents에서 좌표 정보 가져오기
+                // **이미지 데이터베이스 조회**
+                List<CourseDetailImage> subImages = courseDetailImageDao.findByContentId(subContentId);
+
+                if (subImages == null || subImages.isEmpty()) {
+                    // **이미지 데이터베이스에 없으면 API를 통해 가져오기**
+                    subImages = fetchImagesForSubContent(subContentId);
+
+                    // **가져온 이미지를 데이터베이스에 저장**
+                    if (subImages != null && !subImages.isEmpty()) {
+                        courseDetailImageDao.deleteByContentId(subContentId);
+                        courseDetailImageDao.insertCourseDetailImages(subImages);
+                    } else {
+                        subImages = new ArrayList<>();
+                    }
+                }
+
+                detail.setImages(subImages);
+
+                // 좌표 정보 가져오기
                 AreaBasedContents areaContent = areaBasedContentsDao.findById(subContentId);
                 if (areaContent != null) {
                     detail.setMapx(areaContent.getMapx());
                     detail.setMapy(areaContent.getMapy());
                 } else {
-                    // Hyuk : 특정
-//                    // API를 통해 좌표 정보 가져오기
-//                    AreaBasedContents newAreaContent = fetchAreaBasedContentFromAPI(subContentId);
-//                    // 데이터베이스에 삽입
-//                    areaBasedContentsDao.insertAreaBasedContent(newAreaContent);
-//                    detail.setMapx(newAreaContent.getMapx());
-//                    detail.setMapy(newAreaContent.getMapy());
+                    detail.setMapx(null);
+                    detail.setMapy(null);
                 }
             }
         }
@@ -353,7 +392,8 @@ public class TourCourseServiceImpl implements TourCourseService {
                 courseDetailDao.deleteByContentId(contentId);
                 courseDetailDao.insertCourseDetails(courseDetails);
             } else {
-                throw new Exception("API에서 코스 상세 정보를 가져오지 못했습니다.");
+                // 코스 상세 정보가 없는 경우 빈 리스트 반환
+                courseDetails = new ArrayList<>();
             }
         }
         return courseDetails;
@@ -414,4 +454,170 @@ public class TourCourseServiceImpl implements TourCourseService {
 
         return areaContent;
     }
+
+    private List<CourseDetailImage> fetchCourseDetailImagesFromAPI(int contentId) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+
+//        String encodedServiceKey = URLEncoder.encode(serviceKey, "UTF-8");
+
+        URI url = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/detailImage1")
+                .queryParam("serviceKey", serviceKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("contentId", contentId)
+                .queryParam("imageYN", "Y")
+                .queryParam("subImageYN", "Y")
+                .queryParam("_type", "json")
+                .build(true)
+                .toUri();
+        System.out.print(url);
+
+        // API 요청 및 응답 처리
+        String responseStr = restTemplate.getForObject(url, String.class);
+
+        System.out.println(responseStr);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(responseStr);
+        JsonNode responseNode = rootNode.path("response");
+        JsonNode headerNode = responseNode.path("header");
+        String resultCode = headerNode.path("resultCode").asText();
+
+        if (!"0000".equals(resultCode)) {
+            String resultMsg = headerNode.path("resultMsg").asText();
+            throw new Exception("API 에러: " + resultMsg);
+        }
+
+        JsonNode bodyNode = responseNode.path("body");
+        JsonNode itemsNode = bodyNode.path("items");
+
+        List<CourseDetailImage> images = new ArrayList<>();
+
+        if (itemsNode.isMissingNode() || itemsNode.size() == 0) {
+            // 이미지가 없는 경우 빈 리스트 반환
+            return images;
+        }
+
+        JsonNode itemArray = itemsNode.path("item");
+
+        if (itemArray.isMissingNode()) {
+            // 이미지가 없는 경우 빈 리스트 반환
+            return images;
+        }
+
+        if (itemArray.isArray()) {
+            for (JsonNode itemNode : itemArray) {
+                CourseDetailImage image = parseCourseDetailImage(itemNode, contentId);
+                images.add(image);
+            }
+        } else {
+            // item이 단일 객체인 경우
+            CourseDetailImage image = parseCourseDetailImage(itemArray, contentId);
+            images.add(image);
+        }
+
+//        JsonNode bodyNode = responseNode.path("body");
+//        JsonNode itemsNode = bodyNode.path("items");
+//        JsonNode itemArray = itemsNode.path("item");
+//
+//        if (itemArray.isMissingNode()) {
+//            throw new Exception("API 응답에 item이 없습니다.");
+//        }
+//
+//        List<CourseDetailImage> images = new ArrayList<>();
+//
+//        if (itemArray.isArray()) {
+//            for (JsonNode itemNode : itemArray) {
+//                CourseDetailImage image = parseCourseDetailImage(itemNode, contentId);
+//                images.add(image);
+//            }
+//        } else {
+//            // item이 단일 객체인 경우
+//            CourseDetailImage image = parseCourseDetailImage(itemArray, contentId);
+//            images.add(image);
+//        }
+
+        return images;
+    }
+
+    private CourseDetailImage parseCourseDetailImage(JsonNode itemNode, int contentId) {
+        String originimgurl = itemNode.path("originimgurl").asText();
+        String smallimageurl = itemNode.path("smallimageurl").asText();
+        String imgname = itemNode.path("imgname").asText();
+        String cpyrhtDivCd = itemNode.path("cpyrhtDivCd").asText();
+        String serialnum = itemNode.path("serialnum").asText();
+
+        CourseDetailImage image = new CourseDetailImage();
+        image.setContentId(contentId);
+        image.setOriginimgurl(originimgurl);
+        image.setSmallimageurl(smallimageurl);
+        image.setImgname(imgname);
+        image.setCpyrhtDivCd(cpyrhtDivCd);
+        image.setSerialnum(serialnum);
+
+        return image;
+    }
+
+    private List<CourseDetailImage> fetchImagesForSubContent(int subContentId) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+
+        URI url = UriComponentsBuilder.fromHttpUrl("http://apis.data.go.kr/B551011/KorService1/detailImage1")
+                .queryParam("serviceKey", serviceKey)
+                .queryParam("MobileOS", "ETC")
+                .queryParam("MobileApp", "AppTest")
+                .queryParam("contentId", subContentId)
+                .queryParam("imageYN", "Y")
+                .queryParam("subImageYN", "Y")
+                .queryParam("_type", "json")
+                .build(true)
+                .toUri();
+
+        System.out.print(url);
+
+        String responseStr = restTemplate.getForObject(url, String.class);
+
+        System.out.println(responseStr);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(responseStr);
+        JsonNode responseNode = rootNode.path("response");
+        JsonNode headerNode = responseNode.path("header");
+        String resultCode = headerNode.path("resultCode").asText();
+
+        if (!"0000".equals(resultCode)) {
+            String resultMsg = headerNode.path("resultMsg").asText();
+            throw new Exception("API 에러: " + resultMsg);
+        }
+
+        JsonNode bodyNode = responseNode.path("body");
+        JsonNode itemsNode = bodyNode.path("items");
+
+        List<CourseDetailImage> images = new ArrayList<>();
+
+        if (itemsNode.isMissingNode() || itemsNode.size() == 0) {
+            // 이미지가 없는 경우 빈 리스트 반환
+            return images;
+        }
+
+        JsonNode itemArray = itemsNode.path("item");
+
+        if (itemArray.isMissingNode()) {
+            // 이미지가 없는 경우 빈 리스트 반환
+            return images;
+        }
+
+        if (itemArray.isArray()) {
+            for (JsonNode itemNode : itemArray) {
+                CourseDetailImage image = parseCourseDetailImage(itemNode, subContentId);
+                images.add(image);
+            }
+        } else {
+            // item이 단일 객체인 경우
+            CourseDetailImage image = parseCourseDetailImage(itemArray, subContentId);
+            images.add(image);
+        }
+
+        return images;
+    }
+
 }
