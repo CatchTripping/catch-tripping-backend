@@ -146,12 +146,13 @@ public class TourCourseServiceImpl implements TourCourseService {
                     detail.setMapx(areaContent.getMapx());
                     detail.setMapy(areaContent.getMapy());
                 } else {
-                    // API를 통해 좌표 정보 가져오기
-                    AreaBasedContents newAreaContent = fetchAreaBasedContentFromAPI(subContentId);
-                    // 데이터베이스에 삽입
-                    areaBasedContentsDao.insertAreaBasedContent(newAreaContent);
-                    detail.setMapx(newAreaContent.getMapx());
-                    detail.setMapy(newAreaContent.getMapy());
+                    // Hyuk : 특정
+//                    // API를 통해 좌표 정보 가져오기
+//                    AreaBasedContents newAreaContent = fetchAreaBasedContentFromAPI(subContentId);
+//                    // 데이터베이스에 삽입
+//                    areaBasedContentsDao.insertAreaBasedContent(newAreaContent);
+//                    detail.setMapx(newAreaContent.getMapx());
+//                    detail.setMapy(newAreaContent.getMapy());
                 }
             }
         }
