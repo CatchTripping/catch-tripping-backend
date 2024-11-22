@@ -10,7 +10,8 @@ public interface UserDao {
             @Result(property = "userId", column = "user_id"),
             @Result(property = "userName", column = "user_name"),
             @Result(property = "userPassword", column = "user_password"),
-            @Result(property = "userEmail", column = "user_email")
+            @Result(property = "userEmail", column = "user_email"),
+            @Result(property = "profileImage", column = "profile_image")
     })
     User findUserByUsername(String userName);
 
@@ -19,7 +20,8 @@ public interface UserDao {
             @Result(property = "userId", column = "user_id"),
             @Result(property = "userName", column = "user_name"),
             @Result(property = "userPassword", column = "user_password"),
-            @Result(property = "userEmail", column = "user_email")
+            @Result(property = "userEmail", column = "user_email"),
+            @Result(property = "profileImage", column = "profile_image")
     })
     User findUserById(Long userId);
 
@@ -32,4 +34,7 @@ public interface UserDao {
 
     @Select("SELECT count(*) FROM user WHERE user_email = #{userEmail}")
     int countUsersByEmail(String email);
+
+    @Update("UPDATE user SET profile_image = #{profileImage} WHERE user_id = #{userId}")
+    void updateUserProfileImage(User user);
 }

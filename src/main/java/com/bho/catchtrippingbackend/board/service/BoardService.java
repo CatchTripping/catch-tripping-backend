@@ -1,7 +1,6 @@
 package com.bho.catchtrippingbackend.board.service;
 
 import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
 import com.bho.catchtrippingbackend.board.dao.BoardImageDao;
 import com.bho.catchtrippingbackend.board.dao.BoardLikeDao;
@@ -16,7 +15,6 @@ import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,29 +34,30 @@ public class BoardService {
 
     @Transactional
     public void save(Long userId, BoardSaveRequestDto requestDto) {
-        if (requestDto.imageKeys().isEmpty()) {
-            throw new SystemException(ClientErrorCode.INVALID_IMAGE_COUNT);
-        }
+        validateImageKeys(requestDto.imageKeys());
 
         User user = getUserById(userId);
-        Board board = Board.builder()
-                .user(user)
-                .content(requestDto.content())
-                .build();
+        Board board = saveBoard(user, requestDto);
 
-        log.info("Inserting Board: userId={}, content={}", user.getUserId(), requestDto.content());
-        boardDao.save(board);
-        log.info("Board saved with ID: {}", board.getId());
+        moveImagesAndSaveKeys(board.getId(), requestDto.imageKeys());
 
-        // board.getId() 검증
-        if (board.getId() == null) {
-            throw new SystemException(ServerErrorCode.DATABASE_ERROR);
+        log.info("게시글 저장 및 이미지 이동 완료: Board ID = {}", board.getId());
+    }
+
+    private void validateImageKeys(List<String> imageKeys) {
+        if (imageKeys.isEmpty()) {
+            throw new SystemException(ClientErrorCode.INVALID_IMAGE_COUNT);
         }
+    }
 
-        // 이미지 키 저장
-        requestDto.imageKeys().forEach(key -> boardImageDao.save(board.getId(), key));
+    private void moveImagesAndSaveKeys(Long boardId, List<String> tempImageKeys) {
+        List<String> updatedImageKeys = tempImageKeys.stream().map(tempKey -> {
+            String newKey = tempKey.replace("board-images/temp", "board-images/" + boardId);
+            s3Service.moveObject(tempKey, newKey);
+            return newKey;
+        }).collect(Collectors.toList());
 
-        log.info("게시글 저장 완료: Board ID = {}", board.getId());
+        updatedImageKeys.forEach(key -> boardImageDao.save(boardId, key));
     }
 
     @Transactional(readOnly = true)
@@ -97,11 +96,18 @@ public class BoardService {
 
         validateBoardAuthor(userId, board);
 
-        // 이미지 삭제
-        List<String> imageKeys = boardImageDao.findKeysByBoardId(boardId);
-        imageKeys.forEach(s3Service::deleteObject);
+        // 1. S3에서 해당 게시물 폴더 삭제
+        String folderPath = "board-images/" + boardId + "/";
+        s3Service.deleteFolder(folderPath);
 
-        boardDao.delete(boardId);
+        // 2. board_image 테이블에서 해당 레코드 삭제
+        boardImageDao.deleteByBoardId(boardId);
+
+        // 3. board 테이블에서 게시물 삭제
+        int result = boardDao.delete(boardId);
+        if (result != 1) {
+            throw new SystemException(ServerErrorCode.DATABASE_ERROR);
+        }
         log.info("게시글 삭제 완료: Board ID = {}", boardId);
     }
 
@@ -181,14 +187,16 @@ public class BoardService {
         return user;
     }
 
-    private void saveBoard(User user, BoardSaveRequestDto requestDto) {
+    private Board saveBoard(User user, BoardSaveRequestDto requestDto) {
         log.info("Saving board with content : {} for user with ID: {}", requestDto.content(), user.getUserName());
         Board board = requestDto.from(user);
-        int result = boardDao.save(board);
-        log.info("board 저장 잘됐으면 1 반환 : {}", result);
-        if (result != 1) {
+        boardDao.save(board);
+        log.info("board 저장 : {}", board.getId());
+        if (board.getId() == null) {
             throw new SystemException(ServerErrorCode.DATABASE_ERROR);
         }
+
+        return board;
     }
 
     private List<String> generateImageUrls(List<String> keys) {

@@ -26,8 +26,7 @@
 
     <!-- 게시글 ID로 모든 이미지 삭제 -->
     <delete id="deleteByBoardId" parameterType="long">
-        DELETE FROM board_image
-        WHERE board_id = #{boardId}
+        DELETE FROM board_image WHERE board_id = #{boardId}
     </delete>
 
 </mapper>

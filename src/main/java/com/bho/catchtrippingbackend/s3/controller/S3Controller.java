@@ -23,10 +23,21 @@ public class S3Controller {
     @GetMapping("/presigned-url")
     public ResponseEntity<Map<String, String>> getPresignedUrl(
             @RequestParam("filename") String filename,
-            @RequestParam("method") HttpMethod method) {
-        String key = "uploads/" + UUID.randomUUID() + "/" + filename;
-        String url = s3Service.generatePresignedUrl(key, method);
+            @RequestParam("method") HttpMethod method,
+            @RequestParam("type") String type) {
 
+        String key;
+        if ("profile".equals(type)) {
+            // 프로필 이미지 업로드
+            key = "profile-images/temp/" + UUID.randomUUID() + "/" + filename;
+        } else if ("board".equals(type)) {
+            // 게시물 이미지 업로드 - 임시 폴더에 저장
+            key = "board-images/temp/" + UUID.randomUUID() + "/" + filename;
+        } else {
+            throw new IllegalArgumentException("Invalid type parameter");
+        }
+
+        String url = s3Service.generatePresignedUrl(key, method);
         Map<String, String> response = new HashMap<>();
         response.put("url", url);
         response.put("key", key);

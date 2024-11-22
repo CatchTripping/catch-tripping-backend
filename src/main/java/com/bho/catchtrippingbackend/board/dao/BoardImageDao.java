@@ -16,6 +16,8 @@ public interface BoardImageDao {
     // 이미지 키 삭제
     void deleteByKey(@Param("imageKey") String imageKey);
 
+    List<String> findImageKeysByBoardId(Long boardId);
+
     // 게시글 ID로 연결된 모든 이미지 삭제
-    void deleteByBoardId(@Param("boardId") Long boardId);
+    int deleteByBoardId(@Param("boardId") Long boardId);
 }
