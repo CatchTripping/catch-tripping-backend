@@ -42,12 +42,26 @@ public class AttractionImageTests {
         for (CourseDetail courseDetail : courseDetailList) {
             System.out.println(courseDetail.getSubName());
             System.out.println(courseDetail.getId());
+            List<CourseDetailImage> courseDetailImageList= courseDetail.getImages();
+            if(courseDetailImageList==null){
+                System.out.println("null 사진 없음");
+                continue;
+            }
+            for (CourseDetailImage courseDetailImage : courseDetailImageList) {
+                System.out.println(courseDetailImage.getImgname()+" "+courseDetailImage.getSerialnum());
+            }
         }
-        System.out.println("images");
-        List<CourseDetailImage> courseDetailImageList=response.getCourseImages();
-        for (CourseDetailImage courseDetailImage : courseDetailImageList) {
-            System.out.println(courseDetailImage);
-        }
+//        System.out.println("images");
+//        List<CourseDetailImage> courseDetailImageList=response.getCourseImages();
+//        if(courseDetailImageList==null){
+//            System.out.println("사진 리스트 존재 x");
+//        }
+//        else{
+//            for (CourseDetailImage courseDetailImage : courseDetailImageList) {
+//                System.out.println(courseDetailImage);
+//            }
+//        }
+
 
 //        assertNotNull(response);
 //        assertNotNull(response.getOverview());

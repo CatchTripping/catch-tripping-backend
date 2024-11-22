@@ -86,6 +86,7 @@ public class TourCourseServiceImpl implements TourCourseService {
 
         // 이미지 정보 가져오기
         List<CourseDetailImage> images = courseDetailImageDao.findByContentId(contentId);
+        System.out.println(images+"여기");
         if (images == null || images.isEmpty()) {
             // API를 통해 이미지 정보 가져오기
             images = fetchCourseDetailImagesFromAPI(contentId);
@@ -396,6 +397,41 @@ public class TourCourseServiceImpl implements TourCourseService {
                 courseDetails = new ArrayList<>();
             }
         }
+
+        for (CourseDetail detail : courseDetails) {
+            int subContentId = detail.getSubContentId();
+            if (subContentId > 0) {
+                // **이미지 데이터베이스 조회**
+                List<CourseDetailImage> subImages = courseDetailImageDao.findByContentId(subContentId);
+
+                if (subImages == null || subImages.isEmpty()) {
+                    // **이미지 데이터베이스에 없으면 API를 통해 가져오기**
+                    subImages = fetchImagesForSubContent(subContentId);
+
+                    // **가져온 이미지를 데이터베이스에 저장**
+                    if (subImages != null && !subImages.isEmpty()) {
+                        courseDetailImageDao.deleteByContentId(subContentId);
+                        courseDetailImageDao.insertCourseDetailImages(subImages);
+                    } else {
+                        subImages = new ArrayList<>();
+                    }
+                }
+
+                detail.setImages(subImages);
+
+                // 좌표 정보 가져오기
+                AreaBasedContents areaContent = areaBasedContentsDao.findById(subContentId);
+                if (areaContent != null) {
+                    detail.setMapx(areaContent.getMapx());
+                    detail.setMapy(areaContent.getMapy());
+                } else {
+                    detail.setMapx(null);
+                    detail.setMapy(null);
+                }
+            }
+        }
+
+
         return courseDetails;
     }
 
