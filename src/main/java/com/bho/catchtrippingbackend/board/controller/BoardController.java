@@ -74,10 +74,10 @@ public class BoardController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BoardPreviewDto>> findBoardsWithPaging(
+    public ResponseEntity<List<BoardDetailDto>> findBoardsWithPaging(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
-        List<BoardPreviewDto> boards = boardService.findBoardsWithPaging(page, size);
+        List<BoardDetailDto> boards = boardService.findBoardsWithPaging(page, size);
         return ResponseEntity.ok(boards);
     }
 }

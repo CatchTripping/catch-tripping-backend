@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bho.catchtrippingbackend.board.dao.BoardImageDao">
+
+    <!-- 게시글 ID로 이미지 키 검색 -->
+    <select id="findKeysByBoardId" resultType="string" parameterType="long">
+        SELECT image_key
+        FROM board_image
+        WHERE board_id = #{boardId}
+    </select>
+
+    <!-- 이미지 키 저장 -->
+    <insert id="save" parameterType="map">
+        INSERT INTO board_image (board_id, image_key)
+        VALUES (#{boardId}, #{imageKey})
+    </insert>
+
+    <!-- 이미지 키 삭제 -->
+    <delete id="deleteByKey" parameterType="string">
+        DELETE FROM board_image
+        WHERE image_key = #{imageKey}
+    </delete>
+
+    <!-- 게시글 ID로 모든 이미지 삭제 -->
+    <delete id="deleteByBoardId" parameterType="long">
+        DELETE FROM board_image WHERE board_id = #{boardId}
+    </delete>
+
+</mapper>

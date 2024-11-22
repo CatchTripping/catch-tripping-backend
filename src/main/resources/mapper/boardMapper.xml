@@ -10,6 +10,7 @@
         <result property="content" column="content"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+        <result property="likeCount" column="like_count"/>
 
         <association property="user" javaType="User">
             <id property="userId" column="user_id"/>
@@ -22,7 +23,7 @@
     </resultMap>
 
     <!-- Save Board by ID -->
-    <insert id="save" parameterType="Board">
+    <insert id="save" parameterType="Board" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO board (user_id, content)
         VALUES (#{user.userId}, #{content})
     </insert>

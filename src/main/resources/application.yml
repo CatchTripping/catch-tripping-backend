@@ -27,3 +27,13 @@ logging:
 mybatis:
   mapper-locations: mapper/*.xml
   type-aliases-package: com.bho.catchtrippingbackend.**.entity
+
+cloud:
+  aws:
+    s3:
+      bucket: ${aws.bucketName}
+    stack.auto: false
+    region.static: ${aws.regionName}
+    credentials:
+      access-key: ${aws.accessKey}
+      secret-key: ${aws.secretKey}

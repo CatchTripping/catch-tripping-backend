@@ -53,7 +53,7 @@ public class ChatGptService {
 
     private String createPrompt(TravelRecommendationRequest request) {
         return String.format(
-                "여행 유형은 %s이고, 예산 범위는 %s입니다. 관심 있는 활동은 %s이며, 여행 기간은 %s입니다. 이 조건에 맞는 한국의 여행지를 5곳 추천해 주세요. 각 여행지의 이름과 간단한 설명을 제공해주세요. 각 여행지는 다음과 같은 형식으로 출력해주세요:\\n번호. 여행지 이름:설명",
+                "여행 유형은 %s이고, 예산 범위는 %s입니다. 관심 있는 활동은 %s이며, 여행 기간은 %s입니다. 이 조건에 맞는 세부 여행지를 5곳 추천해 주세요. 각 여행지의 이름과 간단한 설명을 제공해주세요. 각 여행지는 다음과 같은 형식으로 출력해주세요:\\n번호. 여행지 이름:설명",
                 request.getSelectedTravelType(),
                 request.getBudgetRange(),
                 String.join(", ", request.getActivities()),
