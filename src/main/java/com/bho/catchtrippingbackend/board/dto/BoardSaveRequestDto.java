@@ -9,7 +9,7 @@ public record BoardSaveRequestDto (
         String content,
         List<String> imageKeys
 ) {
-    public Board from (User user) {
+    public Board toEntity (User user) {
         return Board.builder()
                 .user(user)
                 .content(content)

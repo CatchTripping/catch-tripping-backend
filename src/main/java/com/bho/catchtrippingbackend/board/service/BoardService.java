@@ -123,10 +123,6 @@ public class BoardService {
                     return BoardDetailDto.from(board, imageUrls);
                 })
                 .collect(Collectors.toList());
-
-//        return boards.stream()
-//                .map(BoardPreviewDto::from)
-//                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -136,7 +132,7 @@ public class BoardService {
 
         validateBoardLikeDuplication(user.getUserId(), board.getId());
 
-        BoardLike boardLike = requestDto.from(user, board);
+        BoardLike boardLike = requestDto.toEntity(user, board);
 
         board.incrementLikeCount();
         boardDao.updateLike(board);
@@ -203,7 +199,7 @@ public class BoardService {
 
     private Board saveBoard(User user, BoardSaveRequestDto requestDto) {
         log.info("Saving board with content : {} for user with ID: {}", requestDto.content(), user.getUserName());
-        Board board = requestDto.from(user);
+        Board board = requestDto.toEntity(user);
         boardDao.save(board);
         log.info("board 저장 : {}", board.getId());
         if (board.getId() == null) {

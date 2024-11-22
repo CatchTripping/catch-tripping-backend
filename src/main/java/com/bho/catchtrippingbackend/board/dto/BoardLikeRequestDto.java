@@ -7,7 +7,7 @@ import com.bho.catchtrippingbackend.user.entity.User;
 public record BoardLikeRequestDto(
         Long boardId
 ) {
-    public BoardLike from (User user, Board board) {
+    public BoardLike toEntity (User user, Board board) {
         return BoardLike.builder()
                 .user(user)
                 .board(board)
