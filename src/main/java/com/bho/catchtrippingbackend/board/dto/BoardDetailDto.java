@@ -13,7 +13,8 @@ public record BoardDetailDto(
         String createdDate,
         String createdAt,
         String updatedDate,
-        String updatedAt
+        String updatedAt,
+        long likesCount
 ) {
     public static BoardDetailDto from(Board board, List<String> imageUrls) {
         return new BoardDetailDto(
@@ -24,7 +25,8 @@ public record BoardDetailDto(
                 board.getCreatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
                 board.getCreatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
                 board.getUpdatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
-                board.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm"))
+                board.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
+                board.getLikeCount()
         );
     }
 }
