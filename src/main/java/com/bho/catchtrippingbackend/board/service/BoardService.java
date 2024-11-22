@@ -45,7 +45,7 @@ public class BoardService {
     }
 
     private void validateImageKeys(List<String> imageKeys) {
-        if (imageKeys.isEmpty()) {
+        if (imageKeys == null || imageKeys.isEmpty()) {
             throw new SystemException(ClientErrorCode.INVALID_IMAGE_COUNT);
         }
     }
@@ -55,7 +55,7 @@ public class BoardService {
             String newKey = tempKey.replace("board-images/temp", "board-images/" + boardId);
             s3Service.moveObject(tempKey, newKey);
             return newKey;
-        }).collect(Collectors.toList());
+        }).toList();
 
         updatedImageKeys.forEach(key -> boardImageDao.save(boardId, key));
     }
