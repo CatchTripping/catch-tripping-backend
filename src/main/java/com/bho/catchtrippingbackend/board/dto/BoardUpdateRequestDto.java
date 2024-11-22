@@ -1,3 +1,8 @@
 package com.bho.catchtrippingbackend.board.dto;
 
-public record BoardUpdateRequestDto(String content) {}
+import java.util.List;
+
+public record BoardUpdateRequestDto(
+        String content,
+        List<String> imageUrls
+) {}

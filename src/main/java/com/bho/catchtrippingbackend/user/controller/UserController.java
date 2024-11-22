@@ -12,7 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -108,5 +112,30 @@ public class UserController {
                 userDetails.getAuthorities()
         );
         return ResponseEntity.ok(CustomResponse.success(userInfo));
+    }
+
+    @PostMapping("/profile-image")
+    public ResponseEntity<String> uploadProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody Map<String, String> request) {
+        String tempImageKey = request.get("imageKey");
+        userService.uploadProfileImage(userDetails.getUserId(), tempImageKey);
+        return ResponseEntity.ok("프로필 이미지 업로드 완료");
+    }
+
+    @DeleteMapping("/profile-image")
+    public ResponseEntity<String> deleteProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.deleteProfileImage(userDetails.getUserId());
+        return ResponseEntity.ok("프로필 이미지 삭제 완료");
+    }
+
+    @GetMapping("/profile-image")
+    public ResponseEntity<Map<String, String>> getProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String imageUrl = userService.getProfileImageUrl(userDetails.getUserId());
+        Map<String, String> response = new HashMap<>();
+        response.put("imageUrl", imageUrl);
+        return ResponseEntity.ok(response);
     }
 }
