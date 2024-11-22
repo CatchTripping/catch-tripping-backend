@@ -1,7 +1,9 @@
 package com.bho.catchtrippingbackend.tourcourse.dao;
 
+import com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents;
 import com.bho.catchtrippingbackend.tourcourse.dto.CourseDetail;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

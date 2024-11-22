@@ -33,4 +33,5 @@ public class AreaBasedContents {
     private String tel;
     private String title;
     private String zipcode;
+    private String overview; // 추가된 필드
 }

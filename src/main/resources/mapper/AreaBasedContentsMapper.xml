@@ -352,4 +352,51 @@
             ) &lt; #{distance} * 1000
     </select>
 
+    <!-- 총 코스 개수 조회 -->
+    <select id="countTourCourses" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM area_based_contents
+        WHERE contenttypeid = 25
+        <if test="areaCode != null">
+            AND areacode = #{areaCode}
+        </if>
+        <if test="sigunguCode != null">
+            AND sigungucode = #{sigunguCode}
+        </if>
+    </select>
+
+    <!-- 코스 목록 조회 -->
+    <select id="findTourCourses" parameterType="map" resultMap="AreaBasedContentsMap">
+        SELECT *
+        FROM area_based_contents
+        WHERE contenttypeid = 25
+        <if test="areaCode != null">
+            AND areacode = #{areaCode}
+        </if>
+        <if test="sigunguCode != null">
+            AND sigungucode = #{sigunguCode}
+        </if>
+        ORDER BY contentid DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- AreaBasedContents 삽입 -->
+    <insert id="insertAreaBasedContent" parameterType="com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents">
+        INSERT INTO area_based_contents (contentid, title, mapx, mapy, addr1, addr2, zipcode, createdtime, modifiedtime, overview)
+        VALUES (#{contentid}, #{title}, #{mapx}, #{mapy}, #{addr1}, #{addr2}, #{zipcode}, #{createdtime}, #{modifiedtime}, #{overview})
+    </insert>
+
+    <!-- AreaBasedContents 업데이트 -->
+    <update id="updateAreaBasedContent" parameterType="com.bho.catchtrippingbackend.attractions.dto.AreaBasedContents">
+        UPDATE area_based_contents
+        SET title = #{title},
+            mapx = #{mapx},
+            mapy = #{mapy},
+            addr1 = #{addr1},
+            addr2 = #{addr2},
+            zipcode = #{zipcode},
+            modifiedtime = #{modifiedtime},
+            overview = #{overview}
+        WHERE contentid = #{contentid}
+    </update>
 </mapper>

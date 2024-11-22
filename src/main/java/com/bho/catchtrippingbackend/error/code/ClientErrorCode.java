@@ -25,7 +25,10 @@ public enum ClientErrorCode implements ErrorCodeModel{
     // BoardImage 관련 오류
     INVALID_IMAGE_COUNT(400, "INVALID_IMAGE_COUNT", "게시글에는 적어도 한 장의 이미지를 포함해야 합니다."),
     IMAGE_URL_INVALID(400, "IMAGE_URL_INVALID", "유효하지 않은 이미지 URL입니다."),
-
+    // 댓글 관련 오류
+    COMMENT_NOT_FOUND(404, "COMMENT_NOT_FOUND", "해당 댓글을 찾을 수 없습니다."),
+    COMMENT_DEPTH_EXCEEDED_ERR(400, "COMMENT_DEPTH_EXCEEDED_ERR", "댓글은 대댓글까지만 허용합니다."),
+    COMMENT_ALREADY_DELETED_ERR(400, "COMMENT_ALREADY_DELETED_ERR", "이미 삭제된 댓글입니다.")
     ;
 
     private final int statusCode;

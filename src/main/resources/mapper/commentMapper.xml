@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bho.catchtrippingbackend.comment.dao.CommentDao">
+
+    <!-- User ResultMap -->
+    <resultMap id="UserMap" type="User">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="profileImage" column="profile_image"/>
+        <result property="createdAt" column="user_created_at"/>
+    </resultMap>
+
+    <!-- Board ResultMap -->
+    <resultMap id="BoardMap" type="Board">
+        <id property="id" column="board_id"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="likeCount" column="like_count"/>
+        <association property="user" resultMap="UserMap"/>
+    </resultMap>
+
+    <!-- Comment ResultMap -->
+    <resultMap id="CommentMap" type="Comment">
+        <id property="id" column="id"/>
+        <result property="content" column="content"/>
+        <result property="deleted" column="is_deleted"/>
+        <result property="depth" column="depth"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <association property="user" resultMap="UserMap"/>
+        <association property="board" resultMap="BoardMap"/>
+        <association property="parentComment" column="parent_comment_id"
+                     select="findById"/>
+    </resultMap>
+
+    <!-- Save Comment -->
+    <insert id="save" parameterType="Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comment (
+            user_id,
+            board_id,
+            content,
+            parent_comment_id,
+            depth
+        ) VALUES (
+                 #{user.userId},
+                 #{board.id},
+                 #{content},
+                 #{parentComment.id},
+                 #{depth}
+                 )
+    </insert>
+
+    <!-- Find Comment By Id -->
+    <select id="findById" parameterType="Long" resultMap="CommentMap">
+        SELECT
+            c.id,
+            c.content,
+            c.is_deleted,
+            c.depth,
+            c.parent_comment_id,
+            c.created_at as created_at,
+            c.updated_at as updated_at,
+            u.user_id,
+            u.user_name,
+            u.profile_image,
+            b.id as board_id
+        FROM comment c
+            JOIN user u ON c.user_id = u.user_id
+            JOIN board b ON c.board_id = b.id
+        WHERE c.id = #{id}
+    </select>
+
+    <select id="findParentCommentsWithPaging" resultMap="CommentMap" parameterType="map">
+        SELECT
+            c.id,
+            c.content,
+            c.is_deleted,
+            c.depth,
+            c.parent_comment_id,
+            c.created_at as created_at,
+            c.updated_at as updated_at,
+            u.user_id,
+            u.user_name,
+            u.profile_image,
+            b.id as board_id
+        FROM comment c
+             JOIN user u ON c.user_id = u.user_id
+             JOIN board b ON c.board_id = b.id
+        WHERE c.board_id = #{boardId} AND c.parent_comment_id IS NULL -- 특정 게시판 ID의 댓글만 가져옵니다.
+        ORDER BY c.created_at -- 최신 댓글 우선 정렬
+        LIMIT #{size} OFFSET #{offset} -- 페이지네이션 처리
+    </select>
+
+    <select id="findChildCommentsWithPaging" resultMap="CommentMap" parameterType="map">
+        SELECT
+            c.id,
+            c.content,
+            c.is_deleted,
+            c.depth,
+            c.parent_comment_id,
+            c.created_at as created_at,
+            c.updated_at as updated_at,
+            u.user_id,
+            u.user_name,
+            u.profile_image,
+            b.id as board_id
+        FROM comment c
+             JOIN user u ON c.user_id = u.user_id
+             JOIN board b ON c.board_id = b.id
+        WHERE c.parent_comment_id = #{parentId} -- 특정 부모 댓글 ID의 자식 댓글만 가져옵니다.
+        ORDER BY c.created_at -- 생성일 기준 정렬
+            LIMIT #{size} OFFSET #{offset} -- 페이지네이션 처리
+    </select>
+
+    <update id="update" parameterType="Comment">
+        UPDATE comment
+        SET
+            content = #{content},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete" parameterType="Comment">
+        UPDATE comment
+        SET
+            is_deleted = #{deleted},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

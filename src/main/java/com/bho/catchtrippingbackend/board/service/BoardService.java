@@ -34,9 +34,9 @@ public class BoardService {
 
     @Transactional
     public void save(Long userId, BoardSaveRequestDto requestDto) {
+        User user = getUserById(userId);
         validateImageKeys(requestDto.imageKeys());
 
-        User user = getUserById(userId);
         Board board = saveBoard(user, requestDto);
 
         moveImagesAndSaveKeys(board.getId(), requestDto.imageKeys());
@@ -112,12 +112,21 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public List<BoardPreviewDto> findBoardsWithPaging(int page, int size) {
+    public List<BoardDetailDto> findBoardsWithPaging(int page, int size) {
         int offset = (page - 1) * size;
         List<Board> boards = boardDao.findBoardsWithPaging(offset, size);
+
         return boards.stream()
-                .map(BoardPreviewDto::from)
+                .map(board -> {
+                    List<String> imageKeys = boardImageDao.findKeysByBoardId(board.getId());
+                    List<String> imageUrls = generateImageUrls(imageKeys);
+                    return BoardDetailDto.from(board, imageUrls);
+                })
                 .collect(Collectors.toList());
+
+//        return boards.stream()
+//                .map(BoardPreviewDto::from)
+//                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -128,6 +137,9 @@ public class BoardService {
         validateBoardLikeDuplication(user.getUserId(), board.getId());
 
         BoardLike boardLike = requestDto.from(user, board);
+
+        board.incrementLikeCount();
+        boardDao.updateLike(board);
 
         boardLikeDao.save(boardLike);
     }
@@ -140,6 +152,9 @@ public class BoardService {
         validateBoardLikeExistence(user.getUserId(), board.getId());
 
         boardLikeDao.deleteByUserIdAndBoardId(user.getUserId(), board.getId());
+
+        board.decrementLikeCount();
+        boardDao.updateLike(board);
     }
 
     public void validateBoardLikeExistence(Long userId, Long boardId) {
@@ -159,8 +174,7 @@ public class BoardService {
     }
 
     private void validateBoardAuthor(Long userId, Board board) {
-        boolean isAuthorized = userId == board.getUser().getUserId();
-        if (!isAuthorized) {
+        if (userId != board.getUser().getUserId()) {
             throw new SystemException(ClientErrorCode.FORBIDDEN_USER_ACCESS);
         }
     }

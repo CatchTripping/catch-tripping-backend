@@ -58,4 +58,9 @@
         LIMIT #{size} OFFSET #{offset}
     </select>
 
+    <update id="updateLike" parameterType="Board">
+        UPDATE board
+        SET like_count = #{likeCount}
+        WHERE id = #{id}
+    </update>
 </mapper>
