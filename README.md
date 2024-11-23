@@ -8,7 +8,7 @@
 
 #### 시작
 ```sh
-docker compose -f catch-tripping\mysql.yaml -p catch-tripping up -d mysql
+docker compose -f catch-tripping\mysql.yaml -p catch-tripping up -d
 ```
 - `-f mysql.yaml` : 특정한 yaml 파일을 사용하도록 지정
 - `-p catch-tripping` : Docker Compose 에서 프로젝트 이름 지정
@@ -35,7 +35,7 @@ Docker Compose가 생성한 모든 컨테이너, 네트워크, 볼륨 등을 삭
 
 #### 시작
 ```sh
-docker compose -f catch-tripping\spring.yaml -p catch-tripping up -d mysql spring
+docker compose -f catch-tripping\spring.yaml -p catch-tripping up -d
 ```
 #### 종료
 ```sh
@@ -48,4 +48,29 @@ docker compose -f catch-tripping\spring.yaml -p catch-tripping down
 
 ```sh
 docker rmi catch-tripping-spring
+```
+
+
+### Vue + Spring + MYSQL
+
+1. `catch-tripping/init-db.d/whole_trip.zip` 압축을 풀어 `init-db.d` 폴더 바로 밑에 `whole_trip.sql` 이 존재하게 해주세요.
+2. `gradle bootJar` 을 실행
+3. `vue.d` 폴더에 `dist` 폴더를 넣어주세요.
+
+#### 시작
+```sh
+docker compose -f catch-tripping\trip.yaml -p catch-tripping up -d
+```
+#### 종료
+```sh
+docker compose -f catch-tripping\trip.yaml -p catch-tripping stop
+```
+#### 삭제
+```sh
+docker compose -f catch-tripping\trip.yaml -p catch-tripping down
+```
+
+```sh
+docker rmi catch-tripping-spring
+docker rmi catch-tripping-vue
 ```
