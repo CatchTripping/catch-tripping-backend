@@ -22,6 +22,9 @@ public class S3Service {
     private String bucket;
 
     public String generatePresignedUrl(String key, HttpMethod method) {
+        if (key == null || key.isEmpty()) {
+            return null;
+        }
         Date expiration = getExpiration();
 
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, key)
