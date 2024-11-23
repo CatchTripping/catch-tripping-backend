@@ -31,8 +31,9 @@ public class BoardController {
 
     @GetMapping("/{boardId}")
     public ResponseEntity<BoardDetailDto> findBoardById(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable("boardId") Long boardId) {
-        BoardDetailDto boardDetailDto = boardService.findBoardDetailById(boardId);
+        BoardDetailDto boardDetailDto = boardService.findBoardDetailById(userDetails.getUserId(), boardId);
 
         return ResponseEntity.ok(boardDetailDto);
     }
@@ -75,9 +76,10 @@ public class BoardController {
 
     @GetMapping
     public ResponseEntity<List<BoardDetailDto>> findBoardsWithPaging(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
-        List<BoardDetailDto> boards = boardService.findBoardsWithPaging(page, size);
+        List<BoardDetailDto> boards = boardService.findBoardsWithPaging(userDetails.getUserId(), page, size);
         return ResponseEntity.ok(boards);
     }
 }
