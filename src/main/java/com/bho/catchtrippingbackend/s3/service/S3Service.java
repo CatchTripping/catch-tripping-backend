@@ -73,4 +73,10 @@ public class S3Service {
 
         return expiration;
     }
+
+    public List<String> generatePresignedUrls(List<String> keys, HttpMethod method) {
+        return keys.stream()
+                .map(key -> generatePresignedUrl(key, method))
+                .collect(Collectors.toList());
+    }
 }

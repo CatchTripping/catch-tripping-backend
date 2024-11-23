@@ -20,7 +20,7 @@
         </association>
 
         <collection property="imageUrls" ofType="String">
-            <result column="image_url"/>
+            <result column="image_key"/>
         </collection>
     </resultMap>
 
@@ -35,7 +35,7 @@
         u.user_name,
         u.profile_image,
         u.created_at AS user_created_at,
-        bi.image_url
+        bi.image_key
         FROM board b
         JOIN user u ON b.user_id = u.user_id
         LEFT JOIN board_image bi ON b.id = bi.board_id
