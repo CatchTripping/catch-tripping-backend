@@ -19,15 +19,17 @@ public class Board {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private long likeCount;
+    private boolean isLikedByLoginUser;
     private List<String> imageUrls = new ArrayList<>();
 
     @Builder
-    public Board(Long id, User user, String content, LocalDateTime createdAt, LocalDateTime updatedAt, List<String> imageUrls) {
+    public Board(Long id, User user, String content, LocalDateTime createdAt, LocalDateTime updatedAt, boolean isLikedByLoginUser, List<String> imageUrls) {
         this.id = id;
         this.user = user;
         this.content = content;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.isLikedByLoginUser = isLikedByLoginUser;
         if (imageUrls != null) this.imageUrls = imageUrls;
     }
 

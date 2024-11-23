@@ -61,25 +61,30 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public BoardDetailDto findBoardDetailById(Long boardId) {
+    public BoardDetailDto findBoardDetailById(Long userId, Long boardId) {
         log.info("Fetching board with ID: {}", boardId);
-        Board board = getBoardById(boardId);
+        Board board = getBoardById(userId, boardId);
+
+        String profileImage = s3Service.generatePresignedUrl(board.getUser().getProfileImage(), HttpMethod.GET);
+
         List<String> imageKeys = boardImageDao.findKeysByBoardId(boardId);
 
         // 키를 Presigned URL로 반환
         List<String> imageUrls = generateImageUrls(imageKeys);
 
-        return BoardDetailDto.from(board, imageUrls);
+        return BoardDetailDto.from(board, profileImage, imageUrls);
     }
 
     @Transactional
     public BoardDetailDto update(Long userId, Long boardId, BoardUpdateRequestDto requestDto) {
-        Board board = getBoardById(boardId);
+        Board board = getBoardById(userId, boardId);
 
         validateBoardAuthor(userId, board);
 
         board.update(requestDto.content());
         boardDao.update(board);
+
+        String profileImage = s3Service.generatePresignedUrl(board.getUser().getProfileImage(), HttpMethod.GET);
 
         // 기존 이미지 키 가져오기
         List<String> imageKeys = boardImageDao.findKeysByBoardId(boardId);
@@ -87,12 +92,12 @@ public class BoardService {
         // 키를 Presigned GET URL로 변환
         List<String> imageUrls = generateImageUrls(imageKeys);
 
-        return BoardDetailDto.from(board, imageUrls);
+        return BoardDetailDto.from(board, profileImage, imageUrls);
     }
 
     @Transactional
     public void delete(Long userId, Long boardId) {
-        Board board = getBoardById(boardId);
+        Board board = getBoardById(userId, boardId);
 
         validateBoardAuthor(userId, board);
 
@@ -112,9 +117,9 @@ public class BoardService {
     }
 
     @Transactional(readOnly = true)
-    public List<BoardDetailDto> findBoardsWithPaging(int page, int size) {
+    public List<BoardDetailDto> findBoardsWithPaging(Long userId, int page, int size) {
         int offset = (page - 1) * size;
-        List<Board> boards = boardDao.findBoardsWithPaging(offset, size);
+        List<Board> boards = boardDao.findBoardsWithPaging(userId, offset, size);
 
         return boards.stream()
                 .map(board -> {
@@ -129,7 +134,7 @@ public class BoardService {
     @Transactional
     public void addLike(Long userId, BoardLikeRequestDto requestDto) {
         User user = getUserById(userId);
-        Board board = getBoardById(requestDto.boardId());
+        Board board = getBoardById(userId, requestDto.boardId());
 
         validateBoardLikeDuplication(user.getUserId(), board.getId());
 
@@ -144,7 +149,7 @@ public class BoardService {
     @Transactional
     public void deleteLike(Long userId, BoardLikeRequestDto requestDto) {
         User user = getUserById(userId);
-        Board board = getBoardById(requestDto.boardId());
+        Board board = getBoardById(userId, requestDto.boardId());
 
         validateBoardLikeExistence(user.getUserId(), board.getId());
 
@@ -176,8 +181,8 @@ public class BoardService {
         }
     }
 
-    private Board getBoardById(Long boardId) {
-        Board board = boardDao.findBoardById(boardId);
+    private Board getBoardById(Long userId, Long boardId) {
+        Board board = boardDao.findBoardById(userId, boardId);
         if (board == null) {
             log.error("Board not found with ID: {}", boardId);
             throw new SystemException(ClientErrorCode.BOARD_NOT_FOUND);

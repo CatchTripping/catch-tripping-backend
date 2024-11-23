@@ -32,7 +32,7 @@ public class CommentService {
     @Transactional
     public void save(Long userId, CommentSaveRequestDto requestDto) {
         User user = getUserById(userId);
-        Board board = getBoardById(requestDto.boardId());
+        Board board = getBoardById(userId, requestDto.boardId());
         log.info(requestDto.toString());
 
         Comment parentComment = getParentCommentById(requestDto.parentCommentId());
@@ -170,8 +170,8 @@ public class CommentService {
         return user;
     }
 
-    private Board getBoardById(Long boardId) {
-        Board board = boardDao.findBoardById(boardId);
+    private Board getBoardById(Long userId, Long boardId) {
+        Board board = boardDao.findBoardById(userId, boardId);
         if (board == null) {
             log.error("Board not found with ID: {}", boardId);
             throw new SystemException(ClientErrorCode.BOARD_NOT_FOUND);
