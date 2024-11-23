@@ -29,4 +29,17 @@ public record BoardDetailDto(
                 board.getLikeCount()
         );
     }
+    public static BoardDetailDto from(Board board) {
+        return new BoardDetailDto(
+                board.getId(),
+                board.getUser().getUserName(),
+                board.getContent(),
+                board.getImageUrls(),
+                board.getCreatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
+                board.getCreatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
+                board.getUpdatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
+                board.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
+                board.getLikeCount()
+        );
+    }
 }
