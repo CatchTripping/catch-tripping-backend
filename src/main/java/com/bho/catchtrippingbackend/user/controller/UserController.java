@@ -1,8 +1,10 @@
 package com.bho.catchtrippingbackend.user.controller;
 
+import com.amazonaws.HttpMethod;
 import com.bho.catchtrippingbackend.error.SystemException;
 import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
 import com.bho.catchtrippingbackend.error.response.CustomResponse;
+import com.bho.catchtrippingbackend.s3.service.S3Service;
 import com.bho.catchtrippingbackend.security.CustomUserDetails;
 import com.bho.catchtrippingbackend.user.dto.*;
 import com.bho.catchtrippingbackend.user.entity.User;
@@ -24,6 +26,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final S3Service s3Service;
 
     /**
      * 사용자 등록
@@ -109,6 +112,7 @@ public class UserController {
 
         UserDto userInfo = UserDto.fromEntity(
                 user,
+                s3Service.generatePresignedUrl(user.getProfileImage(), HttpMethod.GET),
                 userDetails.getAuthorities()
         );
         return ResponseEntity.ok(CustomResponse.success(userInfo));
