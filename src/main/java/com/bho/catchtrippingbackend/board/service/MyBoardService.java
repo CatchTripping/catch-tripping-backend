@@ -34,8 +34,9 @@ public class MyBoardService {
     }
 
     private BoardDetailDto convertToBoardDetailDto(Board board) {
+        String profileImage = s3Service.generatePresignedUrl(board.getUser().getProfileImage(), HttpMethod.GET);
         List<String> imageUrls = s3Service.generatePresignedUrls(board.getImageUrls(), HttpMethod.GET);
-        return BoardDetailDto.from(board, imageUrls);
+        return BoardDetailDto.from(board, profileImage, imageUrls);
     }
 
 }

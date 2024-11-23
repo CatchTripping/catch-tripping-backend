@@ -11,11 +11,11 @@ public record UserDto(
         String profileImage,
         Collection<? extends GrantedAuthority> authorities
 ) {
-    public static UserDto fromEntity(User user, Collection<? extends GrantedAuthority> authorities) {
+    public static UserDto fromEntity(User user,String profileImage, Collection<? extends GrantedAuthority> authorities) {
         return new UserDto(
                 user.getUserName(),
                 user.getUserEmail(),
-                user.getProfileImage(),
+                profileImage,
                 authorities
         );
     }

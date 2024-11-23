@@ -118,9 +118,10 @@ public class BoardService {
 
         return boards.stream()
                 .map(board -> {
+                    String profileImage = s3Service.generatePresignedUrl(board.getUser().getProfileImage(), HttpMethod.GET);
                     List<String> imageKeys = boardImageDao.findKeysByBoardId(board.getId());
                     List<String> imageUrls = generateImageUrls(imageKeys);
-                    return BoardDetailDto.from(board, imageUrls);
+                    return BoardDetailDto.from(board, profileImage, imageUrls);
                 })
                 .collect(Collectors.toList());
     }

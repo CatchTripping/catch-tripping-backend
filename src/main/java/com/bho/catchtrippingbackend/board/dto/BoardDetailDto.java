@@ -8,6 +8,7 @@ import java.util.List;
 public record BoardDetailDto(
         Long boardId,
         String userName,
+        String profileImage,
         String content,
         List<String> imageUrls,
         String createdDate,
@@ -20,6 +21,7 @@ public record BoardDetailDto(
         return new BoardDetailDto(
                 board.getId(),
                 board.getUser().getUserName(),
+                board.getUser().getProfileImage(),
                 board.getContent(),
                 imageUrls,
                 board.getCreatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
@@ -29,12 +31,14 @@ public record BoardDetailDto(
                 board.getLikeCount()
         );
     }
-    public static BoardDetailDto from(Board board) {
+
+    public static BoardDetailDto from(Board board, String profileImage, List<String> imageUrls) {
         return new BoardDetailDto(
                 board.getId(),
                 board.getUser().getUserName(),
+                profileImage,
                 board.getContent(),
-                board.getImageUrls(),
+                imageUrls,
                 board.getCreatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
                 board.getCreatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
                 board.getUpdatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
@@ -42,4 +46,18 @@ public record BoardDetailDto(
                 board.getLikeCount()
         );
     }
+
+//    public static BoardDetailDto from(Board board) {
+//        return new BoardDetailDto(
+//                board.getId(),
+//                board.getUser().getUserName(),
+//                board.getContent(),
+//                board.getImageUrls(),
+//                board.getCreatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
+//                board.getCreatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
+//                board.getUpdatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
+//                board.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
+//                board.getLikeCount()
+//        );
+//    }
 }
