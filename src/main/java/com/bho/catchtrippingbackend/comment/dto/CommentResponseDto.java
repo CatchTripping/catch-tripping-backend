@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public record CommentResponseDto(
         Long commentId,
-        Long userId,
+        String userName,
         String content,
         boolean deleted,
         int depth,
@@ -20,7 +20,7 @@ public record CommentResponseDto(
     public static CommentResponseDto from (Comment comment) {
         return new CommentResponseDto(
                 comment.getId(),
-                comment.getUser().getUserId(),
+                comment.getUser().getUserName(),
                 comment.getContent(),
                 comment.isDeleted(),
                 comment.getDepth(),
