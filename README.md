@@ -1,6 +1,6 @@
 
 # Docker
-![img.png](catch-tripping/images/img.png)
+<img src="catch-tripping/images/img.png" alt="도커 폴더 이미지" width="300" height="200">
 
 ### MYSQL 홀로 띄우기
 
