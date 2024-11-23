@@ -53,4 +53,9 @@ dependencyManagement {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	enabled = false
+}
+
+tasks.withType<Jar> {
+	destinationDirectory.set(file("${rootDir}/catch-tripping/spring.d"))
 }

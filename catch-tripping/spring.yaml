@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8.0.40
+    container_name: mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent" ]
+      interval: 3s
+      retries: 5
+      start_period: 30s
+    environment:
+      MYSQL_ROOT_PASSWORD: ssafy           # MySQL root 비밀번호
+      MYSQL_DATABASE: ssafy_test_batch     # 생성할 데이터베이스 이름
+      MYSQL_USER: ssafy                    # 데이터베이스 사용자의 이름
+      MYSQL_PASSWORD: ssafy                # 데이터베이스 사용자의 비밀번호
+    volumes:
+      - ./init-db.d:/docker-entrypoint-initdb.d   # SQL 덤프 파일을 이 디렉토리에 넣으면 자동 실행됨
+      - mysql-data:/var/lib/mysql          # MySQL 데이터 저장소
+    networks:
+      - spring-mysql-network
+    restart: always
+
+  spring:
+    build:
+      context: ./spring.d # Spring Boot 프로젝트의 디렉토리 (JAR 파일 빌드 위치)
+    container_name: spring
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ssafy_test_batch
+    volumes:
+      - spring-data:/tmp
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - spring-mysql-network
+    restart: always
+
+volumes:
+  mysql-data:
+  spring-data:
+
+networks:
+  spring-mysql-network:
+    driver: bridge

@@ -42,5 +42,6 @@ config.yml
 # Ignore wallet
 /Wallet_bonhyukouk
 
-# Ignore sql
+# Ignore
 catch-tripping/init-db.d/*.sql
+catch-tripping/spring.d/*.jar
