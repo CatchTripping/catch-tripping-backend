@@ -1,0 +1,23 @@
+services:
+  mysql:
+    image: mysql:8.0.40
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ssafy   # MySQL root 비밀번호
+      MYSQL_DATABASE: ssafy_test_batch               # 생성할 데이터베이스 이름
+      MYSQL_USER: ssafy                    # 데이터베이스 사용자의 이름
+      MYSQL_PASSWORD: ssafy       # 데이터베이스 사용자의 비밀번호
+    ports:
+      - "3306:3306"                               # 외부에서 접근할 포트
+    volumes:
+      - ./init-db.d:/docker-entrypoint-initdb.d   # SQL 덤프 파일을 이 디렉토리에 넣으면 자동 실행됨
+      - mysql-data:/var/lib/mysql                 # MySQL 데이터 저장소
+    networks:
+      - mysql-network
+
+volumes:
+  mysql-data:
+
+networks:
+  mysql-network:
+    driver: bridge

@@ -36,9 +36,11 @@ out/
 ### VS Code ###
 .vscode/
 
-
 # Ignore config.yml
 config.yml
 
-#Ignore wallet
+# Ignore wallet
 /Wallet_bonhyukouk
+
+# Ignore sql
+catch-tripping/init-db.d/*.sql
