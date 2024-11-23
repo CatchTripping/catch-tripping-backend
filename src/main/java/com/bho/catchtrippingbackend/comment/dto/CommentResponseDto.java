@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 public record CommentResponseDto(
         Long commentId,
         String userName,
+        String profileImage,
         String content,
         boolean deleted,
         int depth,
@@ -17,10 +18,11 @@ public record CommentResponseDto(
         String updatedDate,
         String updatedAt
 ) {
-    public static CommentResponseDto from (Comment comment) {
+    public static CommentResponseDto from (Comment comment, String profileImage) {
         return new CommentResponseDto(
                 comment.getId(),
                 comment.getUser().getUserName(),
+                profileImage,
                 comment.getContent(),
                 comment.isDeleted(),
                 comment.getDepth(),
@@ -36,6 +38,7 @@ public record CommentResponseDto(
                 comment.getId(),
                 null,
                 null,
+                null,
                 true,
                 comment.getDepth(),
                 null,
@@ -45,11 +48,11 @@ public record CommentResponseDto(
         );
     }
 
-    public static CommentResponseDto fromComment(Comment comment) {
+    public static CommentResponseDto fromComment(Comment comment, String profileImage) {
         if (comment.isDeleted()) {
             return fromDeleted(comment);
         } else {
-            return from(comment);
+            return from(comment, profileImage);
         }
     }
 }

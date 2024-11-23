@@ -31,23 +31,23 @@ public class CommentController {
     }
 
     @PatchMapping
-    public ResponseEntity<CommentResponseDto> update(
+    public ResponseEntity<String> update(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody CommentUpdateRequestDto requestDto) {
 
-        CommentResponseDto responseDto = commentService.update(userDetails.getUserId(), requestDto);
+        commentService.update(userDetails.getUserId(), requestDto);
 
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok("댓글 수정 성공");
     }
 
     @PatchMapping("/delete")
-    public ResponseEntity<CommentResponseDto> delete(
+    public ResponseEntity<String> delete(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody CommentDeleteRequestDto requestDto) {
 
-        CommentResponseDto responseDto = commentService.delete(userDetails.getUserId(), requestDto);
+        commentService.delete(userDetails.getUserId(), requestDto);
 
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok("댓글 삭제 성공");
     }
 
     @GetMapping("/{diaryId}")

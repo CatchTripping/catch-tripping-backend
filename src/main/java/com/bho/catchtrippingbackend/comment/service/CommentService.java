@@ -1,5 +1,6 @@
 package com.bho.catchtrippingbackend.comment.service;
 
+import com.amazonaws.HttpMethod;
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
 import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.comment.dao.CommentDao;
@@ -10,6 +11,7 @@ import com.bho.catchtrippingbackend.comment.dto.CommentUpdateRequestDto;
 import com.bho.catchtrippingbackend.comment.entity.Comment;
 import com.bho.catchtrippingbackend.error.SystemException;
 import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
+import com.bho.catchtrippingbackend.s3.service.S3Service;
 import com.bho.catchtrippingbackend.user.dao.UserDao;
 import com.bho.catchtrippingbackend.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class CommentService {
     private final CommentDao commentDao;
     private final UserDao userDao;
     private final BoardDao boardDao;
+    private final S3Service s3Service;
 
     @Transactional
     public void save(Long userId, CommentSaveRequestDto requestDto) {
@@ -38,15 +41,10 @@ public class CommentService {
         Comment parentComment = getParentCommentById(requestDto.parentCommentId());
 
         Comment comment = saveComment(user, board, parentComment, requestDto);
-
-        //id, createdAt, updateAt를 어떻게 구해올지 고민 됨.
-//        log.info(CommentResponseDto.fromComment(comment).toString());
-
-//        return CommentResponseDto.from(comment);
     }
 
     @Transactional
-    public CommentResponseDto update(Long userId, CommentUpdateRequestDto requestDto) {
+    public void update(Long userId, CommentUpdateRequestDto requestDto) {
         Comment comment = getCommentById(requestDto.commentId());
 
         validateCommentAuthor(userId, comment.getUser().getUserId());
@@ -54,13 +52,10 @@ public class CommentService {
         comment.update(requestDto.content());
 
         commentDao.update(comment);
-
-        return CommentResponseDto.from(comment);
-
     }
 
     @Transactional
-    public CommentResponseDto delete(Long userId, CommentDeleteRequestDto requestDto) {
+    public void delete(Long userId, CommentDeleteRequestDto requestDto) {
         Comment comment = getCommentById(requestDto.commentId());
 
         //board를 쓴 사람이거나 comment를 쓴 사람이면 통과
@@ -71,8 +66,6 @@ public class CommentService {
         comment.delete();
 
         commentDao.delete(comment);
-
-        return CommentResponseDto.fromDeleted(comment);
     }
 
     @Transactional(readOnly = true)
@@ -81,7 +74,10 @@ public class CommentService {
         List<Comment> parentComments = commentDao.findParentCommentsWithPaging(boardId, size, offset);
 
         return parentComments.stream()
-                .map(CommentResponseDto::fromComment)
+                .map(comment -> {
+                    String profileImage = s3Service.generatePresignedUrl(comment.getUser().getProfileImage(), HttpMethod.GET);
+                    return CommentResponseDto.from(comment, profileImage);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -91,7 +87,10 @@ public class CommentService {
         List<Comment> childComments = commentDao.findChildCommentsWithPaging(parentId, size, offset);
 
         return childComments.stream()
-                .map(CommentResponseDto::fromComment)
+                .map(comment -> {
+                    String profileImage = s3Service.generatePresignedUrl(comment.getUser().getProfileImage(), HttpMethod.GET);
+                    return CommentResponseDto.from(comment, profileImage);
+                })
                 .collect(Collectors.toList());
     }
 
