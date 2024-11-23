@@ -1,5 +1,6 @@
 
 # Docker
+![img.png](catch-tripping/images/img.png)
 
 ### MYSQL 홀로 띄우기
 
