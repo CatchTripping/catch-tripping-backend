@@ -4,10 +4,7 @@ import com.amazonaws.HttpMethod;
 import com.bho.catchtrippingbackend.board.dao.BoardDao;
 import com.bho.catchtrippingbackend.board.entity.Board;
 import com.bho.catchtrippingbackend.comment.dao.CommentDao;
-import com.bho.catchtrippingbackend.comment.dto.CommentDeleteRequestDto;
-import com.bho.catchtrippingbackend.comment.dto.CommentResponseDto;
-import com.bho.catchtrippingbackend.comment.dto.CommentSaveRequestDto;
-import com.bho.catchtrippingbackend.comment.dto.CommentUpdateRequestDto;
+import com.bho.catchtrippingbackend.comment.dto.*;
 import com.bho.catchtrippingbackend.comment.entity.Comment;
 import com.bho.catchtrippingbackend.error.SystemException;
 import com.bho.catchtrippingbackend.error.code.ClientErrorCode;
@@ -69,14 +66,14 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponseDto> findParentCommentsWithPaging(Long boardId, int page, int size) {
+    public List<ParentCommentResponseDto> findParentCommentsWithPaging(Long boardId, int page, int size) {
         int offset = (page - 1) * size;
         List<Comment> parentComments = commentDao.findParentCommentsWithPaging(boardId, size, offset);
 
         return parentComments.stream()
                 .map(comment -> {
                     String profileImage = s3Service.generatePresignedUrl(comment.getUser().getProfileImage(), HttpMethod.GET);
-                    return CommentResponseDto.from(comment, profileImage);
+                    return ParentCommentResponseDto.from(comment, profileImage);
                 })
                 .collect(Collectors.toList());
     }

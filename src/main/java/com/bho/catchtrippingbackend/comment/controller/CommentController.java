@@ -1,9 +1,6 @@
 package com.bho.catchtrippingbackend.comment.controller;
 
-import com.bho.catchtrippingbackend.comment.dto.CommentDeleteRequestDto;
-import com.bho.catchtrippingbackend.comment.dto.CommentResponseDto;
-import com.bho.catchtrippingbackend.comment.dto.CommentSaveRequestDto;
-import com.bho.catchtrippingbackend.comment.dto.CommentUpdateRequestDto;
+import com.bho.catchtrippingbackend.comment.dto.*;
 import com.bho.catchtrippingbackend.comment.service.CommentService;
 import com.bho.catchtrippingbackend.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -51,12 +48,12 @@ public class CommentController {
     }
 
     @GetMapping("/{diaryId}")
-    public ResponseEntity<List<CommentResponseDto>> findParentCommentsWithPaging(
+    public ResponseEntity<List<ParentCommentResponseDto>> findParentCommentsWithPaging(
             @PathVariable("diaryId") Long diaryId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "20") int size) {
 
-        List<CommentResponseDto> parentComments = commentService.findParentCommentsWithPaging(diaryId, page, size);
+        List<ParentCommentResponseDto> parentComments = commentService.findParentCommentsWithPaging(diaryId, page, size);
 
         return ResponseEntity.ok(parentComments);
     }
