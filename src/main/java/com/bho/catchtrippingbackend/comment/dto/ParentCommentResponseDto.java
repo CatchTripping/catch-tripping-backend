@@ -3,10 +3,8 @@ package com.bho.catchtrippingbackend.comment.dto;
 import com.bho.catchtrippingbackend.comment.entity.Comment;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
-public record CommentResponseDto(
+public record ParentCommentResponseDto(
         Long commentId,
         String userName,
         String profileImage,
@@ -16,10 +14,11 @@ public record CommentResponseDto(
         String createdDate,
         String createdAt,
         String updatedDate,
-        String updatedAt
+        String updatedAt,
+        int childCommentCount
 ) {
-    public static CommentResponseDto from (Comment comment, String profileImage) {
-        return new CommentResponseDto(
+    public static ParentCommentResponseDto from (Comment comment, String profileImage) {
+        return new ParentCommentResponseDto(
                 comment.getId(),
                 comment.getUser().getUserName(),
                 profileImage,
@@ -29,12 +28,13 @@ public record CommentResponseDto(
                 comment.getCreatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
                 comment.getCreatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
                 comment.getUpdatedAt().format(DateTimeFormatter.ofPattern("yy년 MM월 dd일")),
-                comment.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm"))
+                comment.getUpdatedAt().format(DateTimeFormatter.ofPattern("HH:mm")),
+                comment.getChildComments().size()
         );
     }
 
-    public static CommentResponseDto fromDeleted(Comment comment) {
-        return new CommentResponseDto(
+    public static ParentCommentResponseDto fromDeleted(Comment comment) {
+        return new ParentCommentResponseDto(
                 comment.getId(),
                 null,
                 null,
@@ -44,11 +44,12 @@ public record CommentResponseDto(
                 null,
                 null,
                 null,
-                null
+                null,
+                comment.getChildComments().size()
         );
     }
 
-    public static CommentResponseDto fromComment(Comment comment, String profileImage) {
+    public static ParentCommentResponseDto fromComment(Comment comment, String profileImage) {
         if (comment.isDeleted()) {
             return fromDeleted(comment);
         } else {

@@ -21,6 +21,7 @@ public class Comment {
     private int depth;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<Comment> childComments;
 
     @Builder
     public Comment(Long id, User user, Board board, String content, Comment parentComment, int depth, LocalDateTime createdAt, LocalDateTime updatedAt) {
