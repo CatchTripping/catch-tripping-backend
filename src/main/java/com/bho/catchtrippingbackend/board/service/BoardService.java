@@ -132,7 +132,7 @@ public class BoardService {
     }
 
     @Transactional
-    public void addLike(Long userId, BoardLikeRequestDto requestDto) {
+    public BoardLikeResponseDto addLike(Long userId, BoardLikeRequestDto requestDto) {
         User user = getUserById(userId);
         Board board = getBoardById(userId, requestDto.boardId());
 
@@ -144,10 +144,12 @@ public class BoardService {
         boardDao.updateLike(board);
 
         boardLikeDao.save(boardLike);
+
+        return BoardLikeResponseDto.from(board);
     }
 
     @Transactional
-    public void deleteLike(Long userId, BoardLikeRequestDto requestDto) {
+    public BoardLikeResponseDto deleteLike(Long userId, BoardLikeRequestDto requestDto) {
         User user = getUserById(userId);
         Board board = getBoardById(userId, requestDto.boardId());
 
@@ -157,6 +159,8 @@ public class BoardService {
 
         board.decrementLikeCount();
         boardDao.updateLike(board);
+
+        return BoardLikeResponseDto.from(board);
     }
 
     public void validateBoardLikeExistence(Long userId, Long boardId) {

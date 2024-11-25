@@ -57,21 +57,21 @@ public class BoardController {
     }
 
     @PostMapping("/like")
-    public ResponseEntity<String> addLike(
+    public ResponseEntity<BoardLikeResponseDto> addLike(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody BoardLikeRequestDto requestDto) {
-        boardService.addLike(userDetails.getUserId(), requestDto);
+        BoardLikeResponseDto boardLikeResponseDto = boardService.addLike(userDetails.getUserId(), requestDto);
 
-        return ResponseEntity.ok("좋아요 추가 완료");
+        return ResponseEntity.ok(boardLikeResponseDto);
     }
 
     @DeleteMapping("/like")
-    public ResponseEntity<String> deleteLike(
+    public ResponseEntity<BoardLikeResponseDto> deleteLike(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody BoardLikeRequestDto requestDto) {
-        boardService.deleteLike(userDetails.getUserId(), requestDto);
+        BoardLikeResponseDto boardLikeResponseDto = boardService.deleteLike(userDetails.getUserId(), requestDto);
 
-        return ResponseEntity.ok("좋아요 삭제 완료");
+        return ResponseEntity.ok(boardLikeResponseDto);
     }
 
     @GetMapping
