@@ -26,8 +26,7 @@
     </resultMap>
 
     <select id="findMyBoardsWithPaging" parameterType="map" resultMap="BoardResultMap">
-        SELECT
-        b.id AS board_id,
+        SELECT b.id AS board_id,
         b.content,
         b.created_at,
         b.updated_at,
@@ -36,14 +35,13 @@
         u.user_name,
         u.profile_image,
         u.created_at AS user_created_at,
-        bi.image_key,
+        (select bi.image_key from board_image bi where bi.board_id = b.id limit 1) as image_key,
         CASE WHEN bl.id IS NOT NULL THEN true ELSE false END as is_liked
         FROM board b
         JOIN user u ON b.user_id = u.user_id
-        LEFT JOIN board_image bi ON b.id = bi.board_id
         LEFT JOIN board_like bl ON b.id = bl.board_id AND bl.user_id = #{userId}
         WHERE b.user_id = #{userId}
         ORDER BY b.created_at DESC
-        LIMIT #{size} OFFSET #{offset}
+        LIMIT #{size} OFFSET #{offset};
     </select>
 </mapper>
