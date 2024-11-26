@@ -4,7 +4,7 @@ spring:
       - classpath:config.yml
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:${mysql.endpoint}:3306/${mysql.database}?serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:${mysql.endpoint}:3306/${mysql.database}?serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
     username: ${mysql.username}
     password: ${mysql.password}
   ai:
