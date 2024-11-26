@@ -1,5 +1,6 @@
 package com.bho.catchtrippingbackend.board.dao;
 
+import com.bho.catchtrippingbackend.comment.entity.Comment;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,4 +21,6 @@ public interface BoardImageDao {
 
     // 게시글 ID로 연결된 모든 이미지 삭제
     int deleteByBoardId(@Param("boardId") Long boardId);
+
+    List<String> findCommentsByBoardIds(@Param("boardIds") List<Long> boardIds);
 }

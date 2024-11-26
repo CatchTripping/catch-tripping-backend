@@ -8,5 +8,5 @@ import java.util.List;
 
 @Mapper
 public interface LikedBoardDao {
-    List<Board> findLikedBoardsWithPaging(@Param("userId") Long userId, @Param("offset") int offset, @Param("size") int size);
+    List<Board> findLikedBoardsWithPaging(@Param("userId") Long userId, @Param("cursor") Long cursor, @Param("size") int size);
 }

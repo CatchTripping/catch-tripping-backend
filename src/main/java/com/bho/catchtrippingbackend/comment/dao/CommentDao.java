@@ -14,4 +14,5 @@ public interface CommentDao {
     int delete(Comment comment); // delete = true 하는 논리적 삭제
     List<Comment> findParentCommentsWithPaging(@Param("boardId") Long boardId, @Param("size") int size, @Param("offset") int offset);
     List<Comment> findChildCommentsWithPaging(@Param("parentId") Long parentId, @Param("size") int size, @Param("offset") int offset);
+    List<Comment> findCommentsByBoardIds(@Param("boardIds") List<Long> boardIds);
 }

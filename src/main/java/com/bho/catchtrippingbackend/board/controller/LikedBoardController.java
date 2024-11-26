@@ -24,9 +24,9 @@ public class LikedBoardController {
     @GetMapping
     public ResponseEntity<List<BoardDetailDto>> findLikedBoardsWithPaging(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "cursor", required = false) Long cursor,
             @RequestParam(value = "size", defaultValue = "20") int size) {
-        List<BoardDetailDto> likedBoards = likedBoardService.findLikedBoardsWithPaging(userDetails.getUserId(), page, size);
+        List<BoardDetailDto> likedBoards = likedBoardService.findLikedBoardsWithPaging(userDetails.getUserId(), cursor, size);
         return ResponseEntity.ok(likedBoards);
     }
 }
