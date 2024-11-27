@@ -5,6 +5,17 @@
 
 <mapper namespace="com.bho.catchtrippingbackend.board.dao.BoardImageDao">
 
+    <resultMap id="BoardImageResultMap" type="BoardImage">
+        <id property="id" column="id"/>
+        <result property="boardId" column="board_id"/>
+        <result property="imageKey" column="image_key"/>
+
+        <association property="board" javaType="Board">
+            <id property="boardId" column="board_id"/>
+        </association>
+
+    </resultMap>
+
     <!-- 게시글 ID로 이미지 키 검색 -->
     <select id="findKeysByBoardId" resultType="string" parameterType="long">
         SELECT image_key
@@ -28,5 +39,18 @@
     <delete id="deleteByBoardId" parameterType="long">
         DELETE FROM board_image WHERE board_id = #{boardId}
     </delete>
+
+    <select id="findImagesByBoardIds" resultType="BoardImage" parameterType="list">
+        SELECT
+            bi.board_id,
+            bi.image_key
+        FROM
+            board_image bi
+        WHERE
+            bi.board_id IN
+            <foreach item="boardId" collection="list" open="(" separator="," close=")">
+                #{boardId}
+            </foreach>
+    </select>
 
 </mapper>

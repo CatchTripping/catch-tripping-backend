@@ -124,32 +124,6 @@
             LIMIT #{size} OFFSET #{offset}
     </select>
 
-<!--    <select id="findParentCommentsWithPaging" resultMap="CommentMap" parameterType="map">-->
-<!--        SELECT-->
-<!--            c.id,-->
-<!--            c.content,-->
-<!--            c.is_deleted,-->
-<!--            c.depth,-->
-<!--            c.parent_comment_id,-->
-<!--            c.created_at as created_at,-->
-<!--            c.updated_at as updated_at,-->
-<!--            u.user_id,-->
-<!--            u.user_name,-->
-<!--            u.profile_image,-->
-<!--            b.id as board_id,-->
-<!--            (-->
-<!--                SELECT COUNT(*)-->
-<!--                FROM comment child-->
-<!--                WHERE child.parent_comment_id = c.id-->
-<!--            ) AS childCommentCount-->
-<!--        FROM comment c-->
-<!--             JOIN user u ON c.user_id = u.user_id-->
-<!--             JOIN board b ON c.board_id = b.id-->
-<!--        WHERE c.board_id = #{boardId} AND c.parent_comment_id IS NULL &#45;&#45; 특정 게시판 ID의 댓글만 가져옵니다.-->
-<!--        ORDER BY c.created_at &#45;&#45; 최신 댓글 우선 정렬-->
-<!--        LIMIT #{size} OFFSET #{offset} &#45;&#45; 페이지네이션 처리-->
-<!--    </select>-->
-
     <select id="findChildCommentsWithPaging" resultMap="CommentMap" parameterType="map">
         SELECT
             c.id,
@@ -187,13 +161,28 @@
         WHERE id = #{id}
     </update>
 
-    <select id="findCommentsForBoards" resultType="Comment">
-        SELECT c.*
+    <select id="findCommentsByBoardIds" resultMap="CommentMap" parameterType="list">
+        SELECT
+        c.id,
+        c.content,
+        c.is_deleted,
+        c.depth,
+        c.parent_comment_id,
+        c.board_id,
+        c.created_at,
+        c.updated_at,
+        u.user_id,
+        u.user_name,
+        u.profile_image
         FROM comment c
+        JOIN user u ON c.user_id = u.user_id
         WHERE c.board_id IN
-        <foreach collection="boardIds" item="id" open="(" separator="," close=")">
-            #{id}
+        <foreach collection="list" item="boardId" open="(" separator="," close=")">
+            #{boardId}
         </foreach>
+        ORDER BY c.created_at ASC
     </select>
+
+
 
 </mapper>

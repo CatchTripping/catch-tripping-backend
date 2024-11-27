@@ -6,6 +6,7 @@ import com.bho.catchtrippingbackend.board.dao.LikedBoardDao;
 import com.bho.catchtrippingbackend.board.dao.MyBoardDao;
 import com.bho.catchtrippingbackend.board.dto.BoardDetailDto;
 import com.bho.catchtrippingbackend.board.entity.Board;
+import com.bho.catchtrippingbackend.board.entity.BoardLike;
 import com.bho.catchtrippingbackend.comment.dao.CommentDao;
 import com.bho.catchtrippingbackend.comment.entity.Comment;
 import com.bho.catchtrippingbackend.s3.service.S3Service;
@@ -35,16 +36,20 @@ public class LikedBoardService {
             return List.of(); // 빈 리스트 반환
         }
 
+        // board 가져오기
         List<Long> boardIds = boards.stream()
                 .map(Board::getId)
                 .collect(Collectors.toList());
 
+        // 댓글 가져오기
         List<Comment> comments = commentDao.findCommentsByBoardIds(boardIds);
-        List<String> images = boardImageDao.findCommentsByBoardIds(boardIds);
 
-        // Step 4: Board와 연관 데이터 매핑
-        Map<Long, List<Comment>> commentsByBoardId = comments.stream()
-                .collect(Collectors.groupingBy(Comment::getBoardId));
+        //이미지 가져오기
+        List<BoardLike> images = boardImageDao.findCommentsByBoardIds(boardIds);
+
+        // Board에 댓글과 이미지 매핑
+        Map<Long, Long> commentCountsByBoardId = comments.stream()
+                .collect(Collectors.groupingBy(comment -> comment.getBoard().getId(), Collectors.counting()));
 
         Map<Long, List<String>> imagesByBoardId = images.stream()
                 .collect(Collectors.groupingBy(Image::getBoardId));
