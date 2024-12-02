@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bho.catchtrippingbackend.attractions.dao.CategoryCodesDao">
+
+    <!-- CategoryCodes resultMap 정의 -->
+    <resultMap id="CategoryCodesMap" type="com.bho.catchtrippingbackend.attractions.dto.CategoryCodes">
+        <id property="categoryCode" column="category_code"/>
+        <result property="categoryName" column="category_name"/>
+    </resultMap>
+
+    <!-- Primary Key로 조회 -->
+    <select id="findByCategoryCode" parameterType="string" resultMap="CategoryCodesMap">
+        SELECT * FROM category_codes WHERE category_code = #{categoryCode}
+    </select>
+
+    <!-- 모든 카테고리 코드 조회 -->
+    <select id="findAll" resultMap="CategoryCodesMap">
+        SELECT * FROM category_codes
+    </select>
+
+    <!-- 특정 카테고리 이름으로 조회 (정확히 일치하는 경우) -->
+    <select id="findByCategoryName" parameterType="string" resultMap="CategoryCodesMap">
+        SELECT * FROM category_codes WHERE category_name = #{categoryName}
+    </select>
+
+    <!-- 특정 이름을 포함하는 카테고리 코드 조회 (부분 일치 검색) -->
+    <select id="findByCategoryNameContaining" parameterType="string" resultMap="CategoryCodesMap">
+        SELECT * FROM category_codes WHERE category_name LIKE CONCAT('%', #{partialName}, '%')
+    </select>
+
+    <!-- getCategoriesByContentId 메서드 -->
+    <select id="getCategoriesByContentId" parameterType="int" resultMap="CategoryCodesMap">
+        SELECT cc.category_code, cc.category_name
+        FROM category_codes cc
+        WHERE cc.category_code IN (
+            SELECT cat1 FROM area_based_contents WHERE contentid = #{contentId}
+            UNION
+            SELECT cat2 FROM area_based_contents WHERE contentid = #{contentId}
+            UNION
+            SELECT cat3 FROM area_based_contents WHERE contentid = #{contentId}
+        )
+    </select>
+
+
+</mapper>

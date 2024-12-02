@@ -4,5 +4,36 @@ spring:
   profiles:
     active: mysql
 
+
 server:
   port: 8080
+  servlet:
+    session:
+      cookie:
+        secure: false
+        http-only: true
+        same-site: lax
+      timeout: 1800 # 30분
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.bho.catchtrippingbackend: DEBUG
+
+mybatis:
+  mapper-locations: mapper/*.xml
+  type-aliases-package: com.bho.catchtrippingbackend.**.entity
+
+cloud:
+  aws:
+    s3:
+      bucket: ${aws.bucketName}
+    stack.auto: false
+    region.static: ${aws.regionName}
+    credentials:
+      access-key: ${aws.accessKey}
+      secret-key: ${aws.secretKey}
